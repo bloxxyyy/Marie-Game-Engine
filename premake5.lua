@@ -18,17 +18,30 @@ project "Engine"
 
     files {
         "%{prj.name}/src/**.cpp",
-        "%{prj.name}/include/**.h"
+        "%{prj.name}/include/**.h",
+        "vendor/src/GLAD/glad.c",
+        "%{prj.name}/Shaders/**.vert",
+        "%{prj.name}/Shaders/**.frag"
     }
 
     includedirs {
         "%{prj.name}/include",
-        "vendor"
+        "vendor/include",
+    }
+
+    libdirs {
+        "vendor/lib/GLFW"
+    }
+
+    links {
+        "glfw3",
+        "opengl32"
     }
 
     vpaths {
         ["Header Files"] = {"**.h"},
-        ["Source Files"] = {"**.cpp"}
+        ["Source Files"] = {"**.cpp"},
+        ["Shader Files"] = {"Shaders/**.vert", "Shaders/**.frag"}
     }
 
     filter "system:windows"
@@ -60,7 +73,7 @@ project "Sandbox"
 
     includedirs {
         "Engine/include",
-        "vendor"
+        "vendor/include"
     }
 
     links {
@@ -89,6 +102,8 @@ project "SolutionItems"
     language "C++"
     location "."
     files {
-        ".gitignore"
+        ".gitignore",
+        "Scripts/build.ps1",
+        "premake5.lua"
         -- add other root-level files here if needed (README.md, LICENSE, etc.)
     }
