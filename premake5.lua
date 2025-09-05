@@ -1,7 +1,6 @@
 workspace "MarieEngine"
     architecture "x64"
     startproject "Sandbox"
-
     configurations { "Debug", "Release" }
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -15,15 +14,21 @@ project "Engine"
     staticruntime "off"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    objdir    ("bin-int/" .. outputdir .. "/%{prj.name}")
 
     files {
-        "%{prj.name}/**.h",
-        "%{prj.name}/**.cpp"
+        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/include/**.h"
     }
 
     includedirs {
+        "%{prj.name}/include",
         "vendor"
+    }
+
+    vpaths {
+        ["Header Files"] = {"**.h"},
+        ["Source Files"] = {"**.cpp"}
     }
 
     filter "system:windows"
@@ -36,7 +41,6 @@ project "Engine"
     filter "configurations:Release"
         runtime "Release"
         optimize "on"
-
 
 -- Sandbox project
 project "Sandbox"
@@ -47,20 +51,25 @@ project "Sandbox"
     staticruntime "off"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    objdir    ("bin-int/" .. outputdir .. "/%{prj.name}")
 
     files {
-        "%{prj.name}/**.h",
-        "%{prj.name}/**.cpp"
+        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/include/**.h"
     }
 
     includedirs {
-        "Engine",
+        "Engine/include",
         "vendor"
     }
 
     links {
         "Engine"
+    }
+
+    vpaths {
+        ["Header Files"] = {"**.h"},
+        ["Source Files"] = {"**.cpp"}
     }
 
     filter "system:windows"
@@ -73,3 +82,13 @@ project "Sandbox"
     filter "configurations:Release"
         runtime "Release"
         optimize "on"
+
+-- Solution-level files
+project "SolutionItems"
+    kind "Utility" 
+    language "C++"
+    location "."
+    files {
+        ".gitignore"
+        -- add other root-level files here if needed (README.md, LICENSE, etc.)
+    }
