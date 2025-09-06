@@ -20,13 +20,16 @@ project "Engine"
         "%{prj.name}/src/**.cpp",
         "%{prj.name}/include/**.h",
         "vendor/src/GLAD/glad.c",
+        "vendor/src/STB/stb_image.cpp",
         "%{prj.name}/Shaders/**.vert",
-        "%{prj.name}/Shaders/**.frag"
+        "%{prj.name}/Shaders/**.frag",
+        "%{prj.name}/Textures/**.*"
     }
 
     includedirs {
         "%{prj.name}/include",
         "vendor/include",
+        "vendor/include/STB",
     }
 
     libdirs {

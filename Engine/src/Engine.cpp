@@ -1,5 +1,10 @@
 #include "Engine.h"
+#include <glad/glad.h>
 #include <stdexcept>
+#include "Mesh.h"
+#include <vector>
+#include "Texture.h"
+#include "Shader.h"
 
 Engine::Engine(int width, int height, const std::string& title) {
     if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
@@ -17,9 +22,28 @@ Engine::Engine(int width, int height, const std::string& title) {
         throw std::runtime_error("Failed to initialize GLAD");
 
     InitGL();
-    SetupTriangle();
-    shader = new Shader("C:\\MarieEngine\\Engine\\Shaders\\triangle.vert",
-        "C:\\MarieEngine\\Engine\\Shaders\\triangle.frag");
+
+    // Rectangle vertex data: pos(3) + color(3) + uv(2)
+    std::vector<float> vertices = {
+        // positions          // colors           // texture coords
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
+    };
+    std::vector<unsigned int> indices = { 0, 1, 2, 2, 3, 0 };
+
+    mesh = new Mesh(vertices, indices);
+
+    texture = new Texture("C:\\MarieEngine\\Engine\\Textures\\example.png");
+
+    shader = new Shader(
+        "C:\\MarieEngine\\Engine\\Shaders\\triangle.vert",
+        "C:\\MarieEngine\\Engine\\Shaders\\triangle.frag"
+    );
+
+    shader->Use();
+    glUniform1i(glGetUniformLocation(shader->ID, "texture1"), 0);
 }
 
 void Engine::InitGL() {
@@ -27,31 +51,10 @@ void Engine::InitGL() {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 }
 
-void Engine::SetupTriangle() {
-    float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
-    };
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
 Engine::~Engine() {
+    delete mesh;
     delete shader;
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    delete texture;
     glfwDestroyWindow(window);
     glfwTerminate();
 }
@@ -60,9 +63,9 @@ void Engine::Run() {
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
 
+        texture->Bind(GL_TEXTURE0);
         shader->Use();
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        mesh->Draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
