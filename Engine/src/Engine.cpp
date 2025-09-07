@@ -1,12 +1,6 @@
 #include "Engine.h"
-#include <glad/glad.h>
 #include <stdexcept>
-#include "Mesh.h"
-#include <vector>
-#include "Texture.h"
-#include "Shader.h"
-#include <glm.hpp>
-#include <gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 Engine::Engine(int width, int height, const std::string& title) {
     if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
@@ -25,73 +19,18 @@ Engine::Engine(int width, int height, const std::string& title) {
 
     InitGL();
 
-    camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+    // Camera
+    camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
+
     glfwSetWindowUserPointer(window, this);
     glfwSetCursorPosCallback(window, MouseCallback);
     glfwSetScrollCallback(window, ScrollCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
 
-    // Rectangle vertex data: pos(3) + color(3) + uv(2)
-    std::vector<float> vertices = {
-        // positions          // colors          // texture coords
-        // Front face
-        -0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  0.0f,0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f,0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f,1.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.0f,  0.0f,1.0f,
-                                          
-        // Back face                      
-        -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 1.0f,  1.0f,0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f,  0.0f,0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f,  0.0f,1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f,  1.0f,1.0f,
-
-        // Left face
-        -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f,0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f,0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f,1.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f,  0.0f,1.0f,
-                                          
-        // Right face                     
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 1.0f,  1.0f,0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 1.0f,  0.0f,0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,  0.0f,1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f,  1.0f,1.0f,
-
-         // Bottom face
-         -0.5f, -0.5f, -0.5f,  1.0f,0.0f,0.0f,  0.0f,1.0f,
-          0.5f, -0.5f, -0.5f,  0.0f,1.0f,0.0f,  1.0f,1.0f,
-          0.5f, -0.5f,  0.5f,  0.0f,0.0f,1.0f,  1.0f,0.0f,
-         -0.5f, -0.5f,  0.5f,  1.0f,1.0f,0.0f,  0.0f,0.0f,
-
-         // Top face
-         -0.5f,  0.5f, -0.5f,  1.0f,0.0f,1.0f,  0.0f,1.0f,
-          0.5f,  0.5f, -0.5f,  0.0f,1.0f,1.0f,  1.0f,1.0f,
-          0.5f,  0.5f,  0.5f,  1.0f,1.0f,1.0f,  1.0f,0.0f,
-         -0.5f,  0.5f,  0.5f,  0.0f,0.0f,0.0f,  0.0f,0.0f
-    };
-
-    std::vector<unsigned int> indices = {
-        0,1,2, 2,3,0,       // front
-        4,5,6, 6,7,4,       // back
-        8,9,10,10,11,8,     // left
-        12,13,14,14,15,12,  // right
-        16,17,18,18,19,16,  // bottom
-        20,21,22,22,23,20   // top
-    };
-
-
-    mesh = new Mesh(vertices, indices);
-
-    texture = new Texture("C:\\MarieEngine\\Engine\\Textures\\example.png");
-
-    shader = new Shader(
-        "C:\\MarieEngine\\Engine\\Shaders\\triangle.vert",
-        "C:\\MarieEngine\\Engine\\Shaders\\triangle.frag"
-    );
-
-    shader->Use();
-    glUniform1i(glGetUniformLocation(shader->ID, "texture1"), 0);
+Engine::~Engine() {
+    glfwDestroyWindow(window);
+    glfwTerminate();
 }
 
 void Engine::InitGL() {
@@ -100,75 +39,44 @@ void Engine::InitGL() {
     glEnable(GL_DEPTH_TEST);
 }
 
-Engine::~Engine() {
-    delete mesh;
-    delete shader;
-    delete texture;
-    delete camera;
-    glfwDestroyWindow(window);
-    glfwTerminate();
+glm::mat4 Engine::GetCameraProjectionMatrix() const {
+    return glm::perspective(glm::radians(camera->Zoom), 800.0f / 600.0f, 0.1f, 100.0f);
 }
 
-void Engine::Run() {
-    while (!glfwWindowShouldClose(window)) {
+void Engine::ProcessInput() {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 
-        // Per-frame timing
+    // Movement keys
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera->ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) camera->ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera->ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera->ProcessKeyboard(RIGHT, deltaTime);
+}
+
+void Engine::Run(const std::function<void()>& renderCallback) {
+    while (!glfwWindowShouldClose(window)) {
+        // Frame timing
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        else
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        ProcessInput();
 
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera->ProcessKeyboard(FORWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) camera->ProcessKeyboard(BACKWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera->ProcessKeyboard(LEFT, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera->ProcessKeyboard(RIGHT, deltaTime);
-
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-            glfwSetWindowShouldClose(window, true);
-
-        // Clear buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Bind texture and shader
-        texture->Bind(GL_TEXTURE0);
-        shader->Use();
+        // Call Sandbox render code
+        renderCallback();
 
-        // Model: rotate cube over time
-        glm::mat4 model = glm::mat4(1.0f);
-        //model = glm::rotate(model, currentFrame * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-
-        // View matrix from camera pointer
-        glm::mat4 view = camera->GetViewMatrix();
-
-        // Projection: perspective
-        glm::mat4 projection = glm::perspective(
-            glm::radians(camera->Zoom), // FOV from camera
-            800.0f / 600.0f,            // aspect ratio
-            0.1f, 100.0f
-        );
-
-        // Send matrices to shader
-        glUniformMatrix4fv(glGetUniformLocation(shader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(shader->ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(shader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-        // Draw mesh
-        mesh->Draw();
-
-        // Swap buffers and poll events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 }
 
-
-void Engine::MouseCallback(GLFWwindow* window, double xpos, double ypos)
-{
+// Mouse callback
+void Engine::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
     Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    if (!engine) return;
 
     if (engine->firstMouse) {
         engine->lastX = xpos;
@@ -177,18 +85,19 @@ void Engine::MouseCallback(GLFWwindow* window, double xpos, double ypos)
     }
 
     float xoffset = xpos - engine->lastX;
-    float yoffset = engine->lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float yoffset = engine->lastY - ypos;
 
     engine->lastX = xpos;
     engine->lastY = ypos;
 
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    // Only rotate camera if right mouse button is pressed
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
         engine->camera->ProcessMouseMovement(xoffset, yoffset);
-    }
 }
 
-void Engine::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
-{
+// Scroll callback
+void Engine::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
     Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    if (!engine) return;
     engine->camera->ProcessMouseScroll(yoffset);
 }

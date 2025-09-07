@@ -1,38 +1,38 @@
 #pragma once
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "Shader.h"
-#include <string>
-#include "Texture.h"
-#include <Camera.h>
-
-class Shader;
-class Mesh;
+#include <functional>
+#include "Camera.h"
+#include <string> 
+#include <memory>
 
 class Engine {
 public:
     Engine(int width, int height, const std::string& title);
     ~Engine();
 
-    void Run();
+    // Run the engine loop, passing a lambda that renders the frame
+    void Run(const std::function<void()>& renderCallback);
+
+    // Camera accessors
+    Camera* GetCamera() { return camera.get(); }
+    glm::mat4 GetCameraViewMatrix() const { return camera->GetViewMatrix(); }
+    glm::mat4 GetCameraProjectionMatrix() const;
 
 private:
     void InitGL();
+    void ProcessInput();
 
-    GLFWwindow* window;
-    Shader* shader;
-    Mesh* mesh;
-    Texture* texture;
+    static void MouseCallback(GLFWwindow* window, double xpos, double ypos);
+    static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
-    Camera* camera;
-    float lastX = 400.0f; // half of 800 width
-    float lastY = 300.0f; // half of 600 height
+    GLFWwindow* window = nullptr;
+    std::unique_ptr<Camera> camera;
+
+    float lastX = 400.0f;
+    float lastY = 300.0f;
     bool firstMouse = true;
 
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
-
-
-    static void MouseCallback(GLFWwindow* window, double xpos, double ypos);
-    static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 };
