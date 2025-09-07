@@ -90,7 +90,7 @@ int main() {
             glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
             mesh.Draw();
-            });
+        });
     }
     catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
