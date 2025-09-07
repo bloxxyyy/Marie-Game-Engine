@@ -42,8 +42,8 @@ project "Engine"
     }
 
     vpaths {
-        ["Header Files"] = {"**.h"},
-        ["Source Files"] = {"**.cpp"},
+        ["Header Files"] = {"include/**.h"},
+        ["Source Files"] = {"src/**.cpp"},
         ["Shader Files"] = {"Shaders/**.vert", "Shaders/**.frag"}
     }
 
