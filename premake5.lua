@@ -30,6 +30,7 @@ project "Engine"
         "%{prj.name}/include",
         "vendor/include",
         "vendor/include/STB",
+        "vendor/include/GLM",
     }
 
     libdirs {

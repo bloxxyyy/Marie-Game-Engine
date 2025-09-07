@@ -5,6 +5,8 @@
 #include <vector>
 #include "Texture.h"
 #include "Shader.h"
+#include <glm.hpp>
+#include <gtc/type_ptr.hpp>
 
 Engine::Engine(int width, int height, const std::string& title) {
     if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
@@ -65,6 +67,28 @@ void Engine::Run() {
 
         texture->Bind(GL_TEXTURE0);
         shader->Use();
+
+        // Model: rotate over time
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        // View: move "camera" backwards
+        glm::mat4 view = glm::mat4(1.0f);
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+        // Projection: perspective
+        glm::mat4 projection = glm::perspective(
+            glm::radians(45.0f), // FOV
+            800.0f / 600.0f,     // aspect ratio
+            0.1f, 100.0f         // near and far planes
+        );
+
+        // Send matrices to shader
+        glUniformMatrix4fv(glGetUniformLocation(shader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(shader->ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(shader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+
         mesh->Draw();
 
         glfwSwapBuffers(window);
