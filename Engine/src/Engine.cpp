@@ -27,13 +27,53 @@ Engine::Engine(int width, int height, const std::string& title) {
 
     // Rectangle vertex data: pos(3) + color(3) + uv(2)
     std::vector<float> vertices = {
-        // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
+        // positions          // colors          // texture coords
+        // Front face
+        -0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  0.0f,0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f,0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f,1.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.0f,  0.0f,1.0f,
+                                          
+        // Back face                      
+        -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 1.0f,  1.0f,0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f,  0.0f,0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f,  0.0f,1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f,  1.0f,1.0f,
+
+        // Left face
+        -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f,0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f,0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f,1.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f,  0.0f,1.0f,
+                                          
+        // Right face                     
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 1.0f,  1.0f,0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 1.0f,  0.0f,0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,  0.0f,1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f,  1.0f,1.0f,
+
+         // Bottom face
+         -0.5f, -0.5f, -0.5f,  1.0f,0.0f,0.0f,  0.0f,1.0f,
+          0.5f, -0.5f, -0.5f,  0.0f,1.0f,0.0f,  1.0f,1.0f,
+          0.5f, -0.5f,  0.5f,  0.0f,0.0f,1.0f,  1.0f,0.0f,
+         -0.5f, -0.5f,  0.5f,  1.0f,1.0f,0.0f,  0.0f,0.0f,
+
+         // Top face
+         -0.5f,  0.5f, -0.5f,  1.0f,0.0f,1.0f,  0.0f,1.0f,
+          0.5f,  0.5f, -0.5f,  0.0f,1.0f,1.0f,  1.0f,1.0f,
+          0.5f,  0.5f,  0.5f,  1.0f,1.0f,1.0f,  1.0f,0.0f,
+         -0.5f,  0.5f,  0.5f,  0.0f,0.0f,0.0f,  0.0f,0.0f
     };
-    std::vector<unsigned int> indices = { 0, 1, 2, 2, 3, 0 };
+
+    std::vector<unsigned int> indices = {
+        0,1,2, 2,3,0,       // front
+        4,5,6, 6,7,4,       // back
+        8,9,10,10,11,8,     // left
+        12,13,14,14,15,12,  // right
+        16,17,18,18,19,16,  // bottom
+        20,21,22,22,23,20   // top
+    };
+
 
     mesh = new Mesh(vertices, indices);
 
@@ -51,6 +91,7 @@ Engine::Engine(int width, int height, const std::string& title) {
 void Engine::InitGL() {
     glViewport(0, 0, 800, 600);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
 }
 
 Engine::~Engine() {
@@ -63,14 +104,14 @@ Engine::~Engine() {
 
 void Engine::Run() {
     while (!glfwWindowShouldClose(window)) {
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         texture->Bind(GL_TEXTURE0);
         shader->Use();
 
         // Model: rotate over time
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 
         // View: move "camera" backwards
         glm::mat4 view = glm::mat4(1.0f);
