@@ -57,7 +57,7 @@ void Engine::ProcessInput() {
 void Engine::Run(const std::function<void()>& renderCallback) {
     while (!glfwWindowShouldClose(window)) {
         // Frame timing
-        float currentFrame = glfwGetTime();
+        float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
@@ -78,17 +78,20 @@ void Engine::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
     Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
     if (!engine) return;
 
+    float x = static_cast<float>(xpos);
+    float y = static_cast<float>(ypos);
+
     if (engine->firstMouse) {
-        engine->lastX = xpos;
-        engine->lastY = ypos;
+        engine->lastX = x;
+        engine->lastY = y;
         engine->firstMouse = false;
     }
 
-    float xoffset = xpos - engine->lastX;
-    float yoffset = engine->lastY - ypos;
+    float xoffset = x - engine->lastX;
+    float yoffset = engine->lastY - y;
 
-    engine->lastX = xpos;
-    engine->lastY = ypos;
+    engine->lastX = x;
+    engine->lastY = y;
 
     // Only rotate camera if right mouse button is pressed
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
@@ -99,5 +102,5 @@ void Engine::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
 void Engine::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
     Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
     if (!engine) return;
-    engine->camera->ProcessMouseScroll(yoffset);
+    engine->camera->ProcessMouseScroll(static_cast<float>(yoffset));
 }
