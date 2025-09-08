@@ -5,7 +5,9 @@ workspace "MarieEngine"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+-- =========================
 -- Engine project
+-- =========================
 project "Engine"
     location "Engine"
     kind "StaticLib"
@@ -19,8 +21,22 @@ project "Engine"
     files {
         "%{prj.name}/src/**.cpp",
         "%{prj.name}/include/**.h",
+
+        -- GLAD / STB
         "vendor/src/GLAD/glad.c",
         "vendor/src/STB/stb_image.cpp",
+
+        -- ImGui core
+        "vendor/imgui/*.cpp",
+
+        -- ImGui backends (GLFW + OpenGL3)
+        "vendor/imgui/backends/imgui_impl_glfw.cpp",
+        "vendor/imgui/backends/imgui_impl_opengl3.cpp",
+
+        -- ImGui stdlib helper
+        "vendor/imgui/misc/cpp/imgui_stdlib.cpp",
+
+        -- Engine assets
         "%{prj.name}/Shaders/**.vert",
         "%{prj.name}/Shaders/**.frag",
         "%{prj.name}/Textures/**.*"
@@ -31,6 +47,9 @@ project "Engine"
         "vendor/include",
         "vendor/include/STB",
         "vendor/include/GLM",
+        "vendor/imgui",
+        "vendor/imgui/backends",
+        "vendor/imgui/misc/cpp"
     }
 
     libdirs {
@@ -45,7 +64,15 @@ project "Engine"
     vpaths {
         ["Header Files"] = {"include/**.h"},
         ["Source Files"] = {"src/**.cpp"},
-        ["Shader Files"] = {"Shaders/**.vert", "Shaders/**.frag"}
+        ["Shader Files"] = {"Shaders/**.vert", "Shaders/**.frag"},
+        ["External/ImGui"] = {
+            "vendor/imgui/*.cpp",
+            "vendor/imgui/backends/*.cpp",
+            "vendor/imgui/misc/cpp/*.cpp",
+            "vendor/imgui/*.h",
+            "vendor/imgui/backends/*.h",
+            "vendor/imgui/misc/cpp/*.h"
+        }
     }
 
     filter "system:windows"
@@ -59,7 +86,9 @@ project "Engine"
         runtime "Release"
         optimize "on"
 
+-- =========================
 -- Sandbox project
+-- =========================
 project "Sandbox"
     location "Sandbox"
     kind "ConsoleApp"
@@ -77,7 +106,7 @@ project "Sandbox"
 
     includedirs {
         "Engine/include",
-        "vendor/include"
+        "vendor/include",
     }
 
     links {
@@ -100,14 +129,17 @@ project "Sandbox"
         runtime "Release"
         optimize "on"
 
--- Solution-level files
+-- =========================
+-- Solution-level files (Visual Studio)
+-- =========================
 project "SolutionItems"
-    kind "Utility" 
+    kind "Utility"
     language "C++"
     location "."
     files {
         ".gitignore",
         "Scripts/build.ps1",
-        "premake5.lua"
-        -- add other root-level files here if needed (README.md, LICENSE, etc.)
+        "premake5.lua",
+        "vendor/imgui/misc/debuggers/imgui.natvis",
+        "vendor/imgui/misc/debuggers/imgui.natstepfilter"
     }
