@@ -17,6 +17,7 @@ Engine::Engine(int width, int height, const std::string& title) {
     if (!window) { glfwTerminate(); throw std::runtime_error("Failed to create GLFW window"); }
 
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(0);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         throw std::runtime_error("Failed to initialize GLAD");
@@ -40,7 +41,7 @@ Engine::~Engine() {
 void Engine::InitImgui() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -61,21 +62,45 @@ glm::mat4 Engine::GetCameraProjectionMatrix() const {
 }
 
 void Engine::Run(const std::function<void()>& renderCallback) {
+
+    float fpsAccumulator = 0.0f;
+    int   frameCount     = 0;
+    float avgFPS         = 0.0f;
+
     while (!glfwWindowShouldClose(window)) {
 
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        float fps = 1.0f / deltaTime; // Instant FPS
+        fpsAccumulator += fps; // A everage FPS
+        frameCount++;
+        avgFPS = fpsAccumulator / frameCount;
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
+
+        // ---------------------------
+        // Monitoring Window
+        // ---------------------------
+        {
+            ImGui::Begin("Monitoring Window");
+
+            ImGui::Text("Instant FPS: %.1f", fps);
+            ImGui::Text("Avg FPS: %.1f", avgFPS);
+            ImGui::Text("Frame time: %.3f ms", deltaTime * 1000.0f);
+
+            ImGui::End();
+        }
 
         Input::Get().Update();
 
         if (Input::Get().IsMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            camera->ProcessMouseMovement(Input::Get().GetDeltaX(), Input::Get().GetDeltaY());
+            Input::Get().ResetDeltas();
         }
         else {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
