@@ -2,6 +2,9 @@
 #include "Input.h"
 #include <stdexcept>
 #include <glm/gtc/matrix_transform.hpp>
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 Engine::Engine(int width, int height, const std::string& title) {
     if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
@@ -19,6 +22,7 @@ Engine::Engine(int width, int height, const std::string& title) {
         throw std::runtime_error("Failed to initialize GLAD");
 
     InitGL();
+    InitImgui();
 
     Input::Initialize(window);
 
@@ -26,8 +30,24 @@ Engine::Engine(int width, int height, const std::string& title) {
 }
 
 Engine::~Engine() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     glfwDestroyWindow(window);
     glfwTerminate();
+}
+
+void Engine::InitImgui() {
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init();
 }
 
 void Engine::InitGL() {
@@ -46,6 +66,11 @@ void Engine::Run(const std::function<void()>& renderCallback) {
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGui::ShowDemoWindow();
 
         Input::Get().Update();
 
@@ -66,6 +91,18 @@ void Engine::Run(const std::function<void()>& renderCallback) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         renderCallback();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        // Update additional viewports if enabled
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(window);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();

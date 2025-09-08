@@ -25,6 +25,7 @@ public:
 
 private:
     void InitGL();
+    void InitImgui();
 
     GLFWwindow* window = nullptr;
 
