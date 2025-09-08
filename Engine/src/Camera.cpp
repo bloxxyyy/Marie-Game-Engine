@@ -1,77 +1,74 @@
 #include "Camera.h"
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/constants.hpp>
-#include <glm/gtc/matrix_transform.inl>
+#include "Input.h"
 
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
-    : Front(glm::vec3(0.0f, 0.0f, -1.0f)),
-    MovementSpeed(SPEED),
-    MouseSensitivity(SENSITIVITY),
-    Zoom(ZOOM)
+Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)),
+    MovementSpeed(2.5f),
+    MouseSensitivity(0.1f),
+    Zoom(45.0f)
 {
     Position = position;
     WorldUp = up;
     Yaw = yaw;
     Pitch = pitch;
-    updateCameraVectors();
+    UpdateCameraVectors();
 }
 
-Camera::Camera(float posX, float posY, float posZ,
-    float upX, float upY, float upZ,
-    float yaw, float pitch)
-    : Front(glm::vec3(0.0f, 0.0f, -1.0f)),
-    MovementSpeed(SPEED),
-    MouseSensitivity(SENSITIVITY),
-    Zoom(ZOOM)
-{
-    Position = glm::vec3(posX, posY, posZ);
-    WorldUp = glm::vec3(upX, upY, upZ);
-    Yaw = yaw;
-    Pitch = pitch;
-    updateCameraVectors();
+void Camera::Update(float deltaTime) {
+
+    if (Input::Get().IsKeyDown(GLFW_KEY_W)) ProcessKeyboard(FORWARD, deltaTime);
+    if (Input::Get().IsKeyDown(GLFW_KEY_S)) ProcessKeyboard(BACKWARD, deltaTime);
+    if (Input::Get().IsKeyDown(GLFW_KEY_A)) ProcessKeyboard(LEFT, deltaTime);
+    if (Input::Get().IsKeyDown(GLFW_KEY_D)) ProcessKeyboard(RIGHT, deltaTime);
+
+
+    if (Input::Get().IsMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
+        ProcessMouseMovement(
+            (float)Input::Get().GetDeltaX(),
+            (float)Input::Get().GetDeltaY()
+        );
+    }
+
+    float scroll = (float)Input::Get().GetScrollOffsetY();
+    if (scroll != 0.0f) {
+        ProcessMouseScroll(scroll);
+        Input::Get().ResetScrollOffset();
+    }
 }
 
-glm::mat4 Camera::GetViewMatrix() const
-{
+glm::mat4 Camera::GetViewMatrix() const {
     return glm::lookAt(Position, Position + Front, Up);
 }
 
-void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime)
-{
+void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {
     float velocity = MovementSpeed * deltaTime;
-    if (direction == FORWARD)  Position += Front * velocity;
+    if (direction == FORWARD) Position += Front * velocity;
     if (direction == BACKWARD) Position -= Front * velocity;
-    if (direction == LEFT)     Position -= Right * velocity;
-    if (direction == RIGHT)    Position += Right * velocity;
+    if (direction == LEFT) Position -= Right * velocity;
+    if (direction == RIGHT) Position += Right * velocity;
 }
 
-void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch)
-{
+void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch) {
     xoffset *= MouseSensitivity;
     yoffset *= MouseSensitivity;
 
     Yaw += xoffset;
     Pitch += yoffset;
 
-    if (constrainPitch)
-    {
+    if (constrainPitch) {
         if (Pitch > 89.0f) Pitch = 89.0f;
         if (Pitch < -89.0f) Pitch = -89.0f;
     }
 
-    updateCameraVectors();
+    UpdateCameraVectors();
 }
 
-void Camera::ProcessMouseScroll(float yoffset)
-{
+void Camera::ProcessMouseScroll(float yoffset) {
     Zoom -= yoffset;
     if (Zoom < 1.0f) Zoom = 1.0f;
     if (Zoom > 45.0f) Zoom = 45.0f;
 }
 
-void Camera::updateCameraVectors()
-{
+void Camera::UpdateCameraVectors() {
     glm::vec3 front;
     front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     front.y = sin(glm::radians(Pitch));

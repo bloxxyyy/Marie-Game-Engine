@@ -1,53 +1,70 @@
 #include "Input.h"
+#include <stdexcept>
 
-Input::Input(GLFWwindow* window, Camera* camera) : window(window), camera(camera) {
-    glfwSetWindowUserPointer(window, this);
+Input* Input::instance = nullptr;
+
+void Input::Initialize(GLFWwindow* window) {
+    if (!window) throw std::runtime_error("GLFW window is null in Input::Initialize");
+    if (!instance) instance = new Input();
+    instance->window = window;
+
     glfwSetCursorPosCallback(window, MouseCallback);
     glfwSetScrollCallback(window, ScrollCallback);
 }
 
-void Input::ProcessInput(float deltaTime) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+Input& Input::Get() {
+    if (!instance) throw std::runtime_error("Input not initialized!");
+    return *instance;
+}
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera->ProcessKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) camera->ProcessKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera->ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera->ProcessKeyboard(RIGHT, deltaTime);
+void Input::Update() {
+    keyStates.clear();
+    mouseButtonStates.clear();
+
+    for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; ++key) {
+        keyStates[key] = glfwGetKey(window, key) == GLFW_PRESS;
+    }
+
+    for (int btn = GLFW_MOUSE_BUTTON_1; btn <= GLFW_MOUSE_BUTTON_LAST; ++btn) {
+        mouseButtonStates[btn] = glfwGetMouseButton(window, btn) == GLFW_PRESS;
+    }
+}
+
+bool Input::IsKeyDown(int key) const {
+    auto it = keyStates.find(key);
+    return it != keyStates.end() && it->second;
+}
+
+bool Input::IsMouseButtonDown(int button) const {
+    auto it = mouseButtonStates.find(button);
+    return it != mouseButtonStates.end() && it->second;
+}
+
+void Input::ResetDeltas() {
+    deltaX = 0.0;
+    deltaY = 0.0;
 }
 
 void Input::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
-    Input* input = static_cast<Input*>(glfwGetWindowUserPointer(window));
+    Input* input = instance;
     if (!input) return;
 
-    float x = static_cast<float>(xpos);
-    float y = static_cast<float>(ypos);
-
     if (input->firstMouse) {
-        input->lastX = x;
-        input->lastY = y;
+        input->lastX = xpos;
+        input->lastY = ypos;
         input->firstMouse = false;
     }
 
-    float xoffset = x - input->lastX;
-    float yoffset = input->lastY - y;
+    input->deltaX = xpos - input->lastX;
+    input->deltaY = input->lastY - ypos; // y inverted
 
-    input->lastX = x;
-    input->lastY = y;
-
-    // Rotate camera only if RMB is pressed
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        input->camera->ProcessMouseMovement(xoffset, yoffset);
-    }
-    else {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
+    input->lastX = xpos;
+    input->lastY = ypos;
 }
 
 void Input::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-    Input* input = static_cast<Input*>(glfwGetWindowUserPointer(window));
+    Input* input = instance;
     if (!input) return;
 
-    input->camera->ProcessMouseScroll(static_cast<float>(yoffset));
+    input->scrollOffsetY += yoffset;
 }

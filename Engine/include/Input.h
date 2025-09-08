@@ -1,22 +1,42 @@
 #pragma once
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "Camera.h"
+#include <unordered_map>
 
 class Input {
 public:
-    Input(GLFWwindow* window, Camera* camera);
+    static void Initialize(GLFWwindow* window);
+    static Input& Get();
 
-    void ProcessInput(float deltaTime);
+    void Update();
+
+    bool IsKeyDown(int key) const;
+    bool IsMouseButtonDown(int button) const;
+
+    double GetDeltaX() const { return deltaX; }
+    double GetDeltaY() const { return deltaY; }
+    void ResetDeltas();
+
+    double GetScrollOffsetY() const { return scrollOffsetY; }
+    void ResetScrollOffset() { scrollOffsetY = 0.0; }
+
+private:
+    Input() = default;
+
+    static Input* instance;
+
+    GLFWwindow* window = nullptr;
+
+    std::unordered_map<int, bool> keyStates;
+    std::unordered_map<int, bool> mouseButtonStates;
+
+    double lastX = 0.0;
+    double lastY = 0.0;
+    double deltaX = 0.0;
+    double deltaY = 0.0;
+    bool firstMouse = true;
+
+    double scrollOffsetY = 0.0;
 
     static void MouseCallback(GLFWwindow* window, double xpos, double ypos);
     static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-
-private:
-    GLFWwindow* window;
-    Camera* camera;
-
-    float lastX = 400.0f;
-    float lastY = 300.0f;
-    bool firstMouse = true;
 };

@@ -1,7 +1,7 @@
 #include "Engine.h"
+#include "Input.h"
 #include <stdexcept>
 #include <glm/gtc/matrix_transform.hpp>
-#include "Input.h"
 
 Engine::Engine(int width, int height, const std::string& title) {
     if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
@@ -20,8 +20,9 @@ Engine::Engine(int width, int height, const std::string& title) {
 
     InitGL();
 
+    Input::Initialize(window);
+
     camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
-    input = std::make_unique<Input>(window, camera.get());
 }
 
 Engine::~Engine() {
@@ -46,7 +47,21 @@ void Engine::Run(const std::function<void()>& renderCallback) {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        input->ProcessInput(deltaTime);
+        Input::Get().Update();
+
+        if (Input::Get().IsMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+        else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+
+        camera->Update(deltaTime);
+        Input::Get().ResetDeltas();
+
+        // Escape key handled here (engine-level exit)
+        if (Input::Get().IsKeyDown(GLFW_KEY_ESCAPE))
+            glfwSetWindowShouldClose(window, true);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
