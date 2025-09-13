@@ -8,6 +8,9 @@
 #include "Camera.h"
 #include "Input.h"
 
+#include "GUI/Data/EngineStats.h"
+#include "GUI/GuiManager.h"
+
 class Engine {
 public:
     Engine(int width, int height, const std::string& title);
@@ -25,12 +28,14 @@ public:
 
 private:
     void InitGL();
-    void InitImgui();
 
     GLFWwindow* window = nullptr;
 
     std::unique_ptr<Input> input;
     std::unique_ptr<Camera> camera;
+
+    std::unique_ptr<EngineStats> stats;
+    std::unique_ptr<GuiManager> guiManager;
 
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;

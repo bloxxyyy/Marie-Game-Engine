@@ -1,10 +1,10 @@
 #include "Engine.h"
 #include "Input.h"
+
 #include <stdexcept>
 #include <glm/gtc/matrix_transform.hpp>
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+
+#include <GUI/Panels/MonitoringPanel.h>
 
 Engine::Engine(int width, int height, const std::string& title) {
     if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
@@ -23,32 +23,23 @@ Engine::Engine(int width, int height, const std::string& title) {
         throw std::runtime_error("Failed to initialize GLAD");
 
     InitGL();
-    InitImgui();
 
     Input::Initialize(window);
 
     camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
+
+    // Initialize GUI manager and panels
+    stats = std::make_unique<EngineStats>();
+    guiManager = std::make_unique<GuiManager>(window);
+    guiManager->AddPanel<MonitoringPanel>(*stats);
 }
 
 Engine::~Engine() {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+    guiManager.reset();
+    stats.reset();
+
     glfwDestroyWindow(window);
     glfwTerminate();
-}
-
-void Engine::InitImgui() {
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init();
 }
 
 void Engine::InitGL() {
@@ -62,39 +53,34 @@ glm::mat4 Engine::GetCameraProjectionMatrix() const {
 }
 
 void Engine::Run(const std::function<void()>& renderCallback) {
-
     float fpsAccumulator = 0.0f;
-    int   frameCount     = 0;
-    float avgFPS         = 0.0f;
+    int frameCount = 0;
 
     while (!glfwWindowShouldClose(window)) {
-
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        float fps = 1.0f / deltaTime; // Instant FPS
-        fpsAccumulator += fps; // A everage FPS
+        // Update EngineStats
+        stats->deltaTime = deltaTime;
+        stats->fps = (deltaTime > 0.0f) ? 1.0f / deltaTime : 0.0f;
+        fpsAccumulator += stats->fps;
         frameCount++;
-        avgFPS = fpsAccumulator / frameCount;
+        stats->avgFPS = fpsAccumulator / frameCount;
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+        // Stub CPU/GPU/memory usage for now
+        stats->cpuUsage = 20.0f + (rand() % 50);
+        stats->gpuUsage = 10.0f + (rand() % 80);
+        stats->memoryUsed = 512.0f + (rand() % 1024);
+        stats->memoryTotal = 4096.0f;
 
-        // ---------------------------
-        // Monitoring Window
-        // ---------------------------
-        {
-            ImGui::Begin("Monitoring Window");
+        // Start GUI frame
+        guiManager->BeginFrame();
+        guiManager->RenderPanels();
+        guiManager->EndFrame();
+        glfwMakeContextCurrent(window);
 
-            ImGui::Text("Instant FPS: %.1f", fps);
-            ImGui::Text("Avg FPS: %.1f", avgFPS);
-            ImGui::Text("Frame time: %.3f ms", deltaTime * 1000.0f);
-
-            ImGui::End();
-        }
-
+        // Input handling
         Input::Get().Update();
 
         if (Input::Get().IsMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
@@ -109,25 +95,11 @@ void Engine::Run(const std::function<void()>& renderCallback) {
         camera->Update(deltaTime);
         Input::Get().ResetDeltas();
 
-        // Escape key handled here (engine-level exit)
         if (Input::Get().IsKeyDown(GLFW_KEY_ESCAPE))
             glfwSetWindowShouldClose(window, true);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         renderCallback();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        // Update additional viewports if enabled
-        ImGuiIO& io = ImGui::GetIO();
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(window);
-        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
