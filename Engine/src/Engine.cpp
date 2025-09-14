@@ -32,6 +32,8 @@ Engine::Engine(int width, int height, const std::string& title) {
     stats = std::make_unique<EngineStats>();
     guiManager = std::make_unique<GuiManager>(window);
     guiManager->AddPanel<MonitoringPanel>(*stats);
+
+    monitorManager = std::make_unique<Win_Monitoring>();
 }
 
 Engine::~Engine() {
@@ -57,35 +59,29 @@ void Engine::Run(const std::function<void()>& renderCallback) {
     int frameCount = 0;
 
     while (!glfwWindowShouldClose(window)) {
+
         float currentFrame = static_cast<float>(glfwGetTime());
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        FrameStats frameStats = monitorManager->UpdateFrameTiming(currentFrame);
+        deltaTime = frameStats.deltaTime;
 
-        // Update EngineStats
-        stats->deltaTime = deltaTime;
-        stats->fps = (deltaTime > 0.0f) ? 1.0f / deltaTime : 0.0f;
-        fpsAccumulator += stats->fps;
-        frameCount++;
-        stats->avgFPS = fpsAccumulator / frameCount;
+		stats->avgFPS = frameStats.avgFPS;
+        stats->fps = frameStats.fps;
+		stats->deltaTime = frameStats.deltaTime;
 
-        // Stub CPU/GPU/memory usage for now
-        stats->cpuUsage = 20.0f + (rand() % 50);
-        stats->gpuUsage = 10.0f + (rand() % 80);
-        stats->memoryUsed = 512.0f + (rand() % 1024);
-        stats->memoryTotal = 4096.0f;
-
-        // Start GUI frame
-        guiManager->BeginFrame();
-        guiManager->RenderPanels();
-        guiManager->EndFrame();
-        glfwMakeContextCurrent(window);
+        stats->cpuUsage = monitorManager->GetCPUUsage(deltaTime);
 
         // Input handling
         Input::Get().Update();
 
         if (Input::Get().IsMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            camera->ProcessMouseMovement(Input::Get().GetDeltaX(), Input::Get().GetDeltaY());
+
+
+            camera->ProcessMouseMovement(
+                static_cast<float>(Input::Get().GetDeltaX()),
+                static_cast<float>(Input::Get().GetDeltaY())
+            );
+
             Input::Get().ResetDeltas();
         }
         else {
@@ -100,6 +96,12 @@ void Engine::Run(const std::function<void()>& renderCallback) {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderCallback();
+
+        // Start GUI frame
+        guiManager->BeginFrame();
+        guiManager->RenderPanels();
+        guiManager->EndFrame();
+        glfwMakeContextCurrent(window);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

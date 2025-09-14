@@ -4,6 +4,7 @@
 MonitoringPanel::MonitoringPanel(EngineStats& s) : stats(s) {}
 
 void MonitoringPanel::OnImGuiRender() {
+
     if (!IsOpen) return;
 
     ImGui::Begin("Monitoring Window", &IsOpen);
@@ -17,12 +18,6 @@ void MonitoringPanel::OnImGuiRender() {
 
     // CPU/GPU usage
     ImGui::Text("CPU Usage: %.1f%%", stats.cpuUsage);
-    ImGui::Text("GPU Usage: %.1f%%", stats.gpuUsage);
-
-    ImGui::Separator();
-
-    // Memory usage
-    ImGui::Text("Memory: %.1f / %.1f MB", stats.memoryUsed, stats.memoryTotal);
 
     ImGui::End();
 }

@@ -1,6 +1,15 @@
 #pragma once
+
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
+// GLAD before GLFW
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include <functional>
 #include <string>
 #include <memory>
@@ -10,6 +19,7 @@
 
 #include "GUI/Data/EngineStats.h"
 #include "GUI/GuiManager.h"
+#include "Monitoring/Win_Monitoring.h"
 
 class Engine {
 public:
@@ -36,7 +46,7 @@ private:
 
     std::unique_ptr<EngineStats> stats;
     std::unique_ptr<GuiManager> guiManager;
+    std::unique_ptr<Win_Monitoring> monitorManager;
 
     float deltaTime = 0.0f;
-    float lastFrame = 0.0f;
 };
