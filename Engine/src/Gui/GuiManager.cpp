@@ -1,6 +1,7 @@
 #include "GUI/GuiManager.h"
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <GUI/Theme/DefaultTheme.h>
 
 GuiManager::GuiManager(GLFWwindow* window) : m_Window(window)
 {
@@ -12,7 +13,17 @@ GuiManager::GuiManager(GLFWwindow* window) : m_Window(window)
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
+    io.Fonts->AddFontDefault(); // keep default
+    DefaultTheme::RegularFont = io.Fonts->AddFontFromFileTTF("C:\\MarieEngine\\Engine\\Fonts\\Roboto-Regular.ttf", 20.0f);
+    DefaultTheme::TopBarFont = io.Fonts->AddFontFromFileTTF("C:\\MarieEngine\\Engine\\Fonts\\Roboto-Bold.ttf", 26.0f);
+    DefaultTheme::HeaderFont = io.Fonts->AddFontFromFileTTF("C:\\MarieEngine\\Engine\\Fonts\\Roboto-Bold.ttf", 22.0f);
+
+    if (DefaultTheme::RegularFont)
+        io.FontDefault = DefaultTheme::RegularFont;
+
+
     ImGui::StyleColorsDark();
+    DefaultTheme::Apply();
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 410");

@@ -39,7 +39,8 @@ project "Engine"
         -- Engine assets
         "%{prj.name}/Shaders/**.vert",
         "%{prj.name}/Shaders/**.frag",
-        "%{prj.name}/Textures/**.*"
+        "%{prj.name}/Textures/**.*",
+        "%{prj.name}/Fonts/**.*"
     }
 
     includedirs {

@@ -76,7 +76,6 @@ void Input::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
     }
 }
 
-
 void Input::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
     if (prevScrollCallback) prevScrollCallback(window, xoffset, yoffset);
 
