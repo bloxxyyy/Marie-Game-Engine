@@ -19,32 +19,42 @@ uniform vec3 viewPos;
 // Lighting strengths
 uniform float ambientStrength; 
 uniform float diffuseStrength;
-uniform float specularStrength;  // new uniform for specular intensity
-uniform float shininess;         // new uniform for specular shininess
+uniform float specularStrength;
+uniform float shininess;
 
 void main()
 {
     // --- Base texture color ---
     vec3 texColor = texture(texture1, TexCoord).rgb;
-    texColor *= ourColor; // optional tint
+    texColor *= ourColor;
 
-    // --- Ambient ---
-    vec3 ambient = ambientStrength * lightColor;
-
-    // --- Diffuse ---
+    // --- Diffuse + Specular ---
     vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(lightPos - FragPos);
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diffuseStrength * diff * lightColor;
+    vec3 lightDir = FragPos - lightPos;           // direction from light to fragment
+    float distance = length(lightDir);
+    lightDir = normalize(lightDir);
 
-    // --- Specular ---
+    // Strong localized attenuation (tiny lamp effect)
+    float constant = 0.5;
+    float linear = 0.2;
+    float quadratic = 2.0; // stronger quadratic falloff
+    float attenuation = 1.0 / (constant + linear * distance + quadratic * distance * distance);
+
+    
+    // --- Ambient ---
+    vec3 ambient = ambientStrength * lightColor * attenuation;
+
+    // Diffuse
+    float diff = max(dot(norm, -lightDir), 0.0);
+    vec3 diffuse = diffuseStrength * diff * lightColor * attenuation;
+
+    // Specular
     vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(-lightDir, norm);
+    vec3 reflectDir = reflect(lightDir, norm);  // reflect around normal
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-    vec3 specular = specularStrength * spec * lightColor;
+    vec3 specular = specularStrength * spec * lightColor * attenuation;
 
     // --- Combine ---
-    vec3 result = (ambient + diffuse + specular) * texColor;
-
-    FragColor = vec4(result, 1.0);
+    vec3 result = ambient + diffuse + specular;
+    FragColor = vec4(result * texColor, 1.0);
 }

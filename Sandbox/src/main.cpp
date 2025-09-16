@@ -75,7 +75,7 @@ int main() {
 
         // Light settings
         glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-        glm::vec3 lightPos(1.2f, .5f, 2.0f); // fixed light position in world space
+        glm::vec3 lightPos(0.0f, 0.0f, 1.0f);
         float ambientStrength = 0.1f;
 
         // Run the engine loop, pass a lambda to render each frame
