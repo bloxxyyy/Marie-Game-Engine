@@ -30,27 +30,25 @@ void main()
 
     // --- Diffuse + Specular ---
     vec3 norm = normalize(Normal);
-    vec3 lightDir = FragPos - lightPos;           // direction from light to fragment
-    float distance = length(lightDir);
-    lightDir = normalize(lightDir);
+    vec3 lightDir = normalize(lightPos - FragPos);
 
-    // Strong localized attenuation (tiny lamp effect)
+    // attenuation
+    float distance = length(lightPos - FragPos);
     float constant = 0.5;
     float linear = 0.2;
-    float quadratic = 2.0; // stronger quadratic falloff
+    float quadratic = 2.0;
     float attenuation = 1.0 / (constant + linear * distance + quadratic * distance * distance);
 
-    
-    // --- Ambient ---
+    // ambient
     vec3 ambient = ambientStrength * lightColor * attenuation;
 
-    // Diffuse
-    float diff = max(dot(norm, -lightDir), 0.0);
+    // diffuse
+    float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diffuseStrength * diff * lightColor * attenuation;
 
-    // Specular
+    // specular
     vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(lightDir, norm);  // reflect around normal
+    vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
     vec3 specular = specularStrength * spec * lightColor * attenuation;
 
