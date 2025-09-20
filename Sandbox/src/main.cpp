@@ -12,44 +12,43 @@ int main() {
     try {
         Engine engine(800, 600, "MarieEngine");
 
-        // pos(3) + color(3) + uv(2) + normal(3) = 11 floats per vertex
+        // pos(3) + uv(2) + normal(3) = 8 floats per vertex
         std::vector<float> vertices = {
-            // positions          // colors        // tex coords // normals
-            // Front face (0,0,1)
-            -0.5f,-0.5f, 0.5f,    1.0f,0.0f,0.0f,  0.0f,0.0f,    0.0f,0.0f,1.0f,
-             0.5f,-0.5f, 0.5f,    0.0f,1.0f,0.0f,  1.0f,0.0f,    0.0f,0.0f,1.0f,
-             0.5f, 0.5f, 0.5f,    0.0f,0.0f,1.0f,  1.0f,1.0f,    0.0f,0.0f,1.0f,
-            -0.5f, 0.5f, 0.5f,    1.0f,1.0f,0.0f,  0.0f,1.0f,    0.0f,0.0f,1.0f,
+            // positions        // tex coords // normals
+            -0.5f,-0.5f, 0.5f,   0.0f,0.0f,   0.0f,0.0f,1.0f,
+             0.5f,-0.5f, 0.5f,   1.0f,0.0f,   0.0f,0.0f,1.0f,
+             0.5f, 0.5f, 0.5f,   1.0f,1.0f,   0.0f,0.0f,1.0f,
+            -0.5f, 0.5f, 0.5f,   0.0f,1.0f,   0.0f,0.0f,1.0f,
 
-            // Back face (0,0,-1)
-            -0.5f,-0.5f,-0.5f,    1.0f,0.0f,1.0f,  1.0f,0.0f,    0.0f,0.0f,-1.0f,
-             0.5f,-0.5f,-0.5f,    0.0f,1.0f,1.0f,  0.0f,0.0f,    0.0f,0.0f,-1.0f,
-             0.5f, 0.5f,-0.5f,    1.0f,1.0f,1.0f,  0.0f,1.0f,    0.0f,0.0f,-1.0f,
-            -0.5f, 0.5f,-0.5f,    0.0f,0.0f,0.0f,  1.0f,1.0f,    0.0f,0.0f,-1.0f,
+            // back face
+            -0.5f,-0.5f,-0.5f,   1.0f,0.0f,   0.0f,0.0f,-1.0f,
+             0.5f,-0.5f,-0.5f,   0.0f,0.0f,   0.0f,0.0f,-1.0f,
+             0.5f, 0.5f,-0.5f,   0.0f,1.0f,   0.0f,0.0f,-1.0f,
+            -0.5f, 0.5f,-0.5f,   1.0f,1.0f,   0.0f,0.0f,-1.0f,
 
-            // Left face (-1,0,0)
-            -0.5f,-0.5f,-0.5f,    1.0f,0.0f,0.0f,  0.0f,0.0f,   -1.0f,0.0f,0.0f,
-            -0.5f,-0.5f, 0.5f,    0.0f,1.0f,0.0f,  1.0f,0.0f,   -1.0f,0.0f,0.0f,
-            -0.5f, 0.5f, 0.5f,    0.0f,0.0f,1.0f,  1.0f,1.0f,   -1.0f,0.0f,0.0f,
-            -0.5f, 0.5f,-0.5f,    1.0f,1.0f,0.0f,  0.0f,1.0f,   -1.0f,0.0f,0.0f,
+            // left face
+            -0.5f,-0.5f,-0.5f,   0.0f,0.0f,  -1.0f,0.0f,0.0f,
+            -0.5f,-0.5f, 0.5f,   1.0f,0.0f,  -1.0f,0.0f,0.0f,
+            -0.5f, 0.5f, 0.5f,   1.0f,1.0f,  -1.0f,0.0f,0.0f,
+            -0.5f, 0.5f,-0.5f,   0.0f,1.0f,  -1.0f,0.0f,0.0f,
 
-            // Right face (1,0,0)
-             0.5f,-0.5f,-0.5f,    1.0f,0.0f,1.0f,  1.0f,0.0f,    1.0f,0.0f,0.0f,
-             0.5f,-0.5f, 0.5f,    0.0f,1.0f,1.0f,  0.0f,0.0f,    1.0f,0.0f,0.0f,
-             0.5f, 0.5f, 0.5f,    1.0f,1.0f,1.0f,  0.0f,1.0f,    1.0f,0.0f,0.0f,
-             0.5f, 0.5f,-0.5f,    0.0f,0.0f,0.0f,  1.0f,1.0f,    1.0f,0.0f,0.0f,
+            // right face
+             0.5f,-0.5f,-0.5f,   1.0f,0.0f,   1.0f,0.0f,0.0f,
+             0.5f,-0.5f, 0.5f,   0.0f,0.0f,   1.0f,0.0f,0.0f,
+             0.5f, 0.5f, 0.5f,   0.0f,1.0f,   1.0f,0.0f,0.0f,
+             0.5f, 0.5f,-0.5f,   1.0f,1.0f,   1.0f,0.0f,0.0f,
 
-             // Bottom face (0,-1,0)
-             -0.5f,-0.5f,-0.5f,    1.0f,0.0f,0.0f,  0.0f,1.0f,    0.0f,-1.0f,0.0f,
-              0.5f,-0.5f,-0.5f,    0.0f,1.0f,0.0f,  1.0f,1.0f,    0.0f,-1.0f,0.0f,
-              0.5f,-0.5f, 0.5f,    0.0f,0.0f,1.0f,  1.0f,0.0f,    0.0f,-1.0f,0.0f,
-             -0.5f,-0.5f, 0.5f,    1.0f,1.0f,0.0f,  0.0f,0.0f,    0.0f,-1.0f,0.0f,
+             // bottom face
+             -0.5f,-0.5f,-0.5f,   0.0f,1.0f,   0.0f,-1.0f,0.0f,
+              0.5f,-0.5f,-0.5f,   1.0f,1.0f,   0.0f,-1.0f,0.0f,
+              0.5f,-0.5f, 0.5f,   1.0f,0.0f,   0.0f,-1.0f,0.0f,
+             -0.5f,-0.5f, 0.5f,   0.0f,0.0f,   0.0f,-1.0f,0.0f,
 
-             // Top face (0,1,0)
-             -0.5f, 0.5f,-0.5f,    1.0f,0.0f,1.0f,  0.0f,1.0f,    0.0f,1.0f,0.0f,
-              0.5f, 0.5f,-0.5f,    0.0f,1.0f,1.0f,  1.0f,1.0f,    0.0f,1.0f,0.0f,
-              0.5f, 0.5f, 0.5f,    1.0f,1.0f,1.0f,  1.0f,0.0f,    0.0f,1.0f,0.0f,
-             -0.5f, 0.5f, 0.5f,    0.0f,0.0f,0.0f,  0.0f,0.0f,    0.0f,1.0f,0.0f
+             // top face
+             -0.5f, 0.5f,-0.5f,   0.0f,1.0f,   0.0f,1.0f,0.0f,
+              0.5f, 0.5f,-0.5f,   1.0f,1.0f,   0.0f,1.0f,0.0f,
+              0.5f, 0.5f, 0.5f,   1.0f,0.0f,   0.0f,1.0f,0.0f,
+             -0.5f, 0.5f, 0.5f,   0.0f,0.0f,   0.0f,1.0f,0.0f
         };
 
         std::vector<unsigned int> indices = {
@@ -92,8 +91,14 @@ int main() {
 
             // Model transform
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::rotate(model, (float)glfwGetTime() /** glm::radians(50.0f)*/,
-                glm::vec3(/*0.5f*/0, 1.0f, 0.0f));
+            //model = glm::rotate(model, (float)glfwGetTime() /** glm::radians(50.0f)*/,
+            //    glm::vec3(/*0.5f*/0, 1.0f, 0.0f));
+
+            model = glm::rotate(
+                model,
+                glm::radians(45.0f),
+                glm::vec3(0, 1.0f, 0.0f)
+            );
 
             // Get view and projection from engine's camera
             glm::mat4 view = engine.GetCameraViewMatrix();

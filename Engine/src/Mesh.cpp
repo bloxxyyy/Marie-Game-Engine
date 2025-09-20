@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 
 Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices) {
-	vertexCount = static_cast<GLsizei>(vertices.size() / 11); // 8 floats per vertex (position + color + uv = 2 + normal = 3)
+	vertexCount = static_cast<GLsizei>(vertices.size() / 8); // 8 floats per vertex (position + uv = 2 + normal = 3)
     indexCount = static_cast<GLsizei>(indices.size());
     useEBO = !indices.empty();
 
@@ -22,20 +22,16 @@ Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& 
     }
 
     // Positions
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Colors
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
+    // Texture coordinates
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    // Texture coordinates
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
     // normal
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
-    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glBindVertexArray(0);
 }

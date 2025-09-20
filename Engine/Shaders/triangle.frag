@@ -1,6 +1,5 @@
 #version 330 core
 
-in vec3 ourColor;
 in vec2 TexCoord;
 in vec3 Normal;
 in vec3 FragPos;
@@ -26,7 +25,6 @@ void main()
 {
     // --- Base texture color ---
     vec3 texColor = texture(texture1, TexCoord).rgb;
-    texColor *= ourColor;
 
     // --- Diffuse + Specular ---
     vec3 norm = normalize(Normal);
