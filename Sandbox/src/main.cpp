@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <Material.h>
+#include <Light.h>
 
 int main() {
     try {
@@ -60,34 +62,29 @@ int main() {
             20,21,22,22,23,20   // top
         };
 
-        Mesh mesh(vertices, indices);
         Texture texture("C:\\MarieEngine\\Engine\\Textures\\example.png");
+        Material material(texture);
+        Light light({ 0,0,1 }, { 1,1,1 }, 0.1f, 1.0f, 1.0f);
+
         Shader shader(
             "C:\\MarieEngine\\Engine\\Shaders\\triangle.vert",
             "C:\\MarieEngine\\Engine\\Shaders\\triangle.frag"
         );
 
+        Mesh mesh(vertices, indices);
+
         shader.Use();
+        light.ApplyToShader(shader);
+        material.ApplyToShader(shader);
+
         glUniform1i(glGetUniformLocation(shader.ID, "texture1"), 0);
-
-        float diffuseStrength = 1.0f; // full diffuse
-
-        // Light settings
-        glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-        glm::vec3 lightPos(0.0f, 0.0f, 1.0f);
-        float ambientStrength = 0.1f;
 
         // Run the engine loop, pass a lambda to render each frame
         engine.Run([&]() {
             texture.Bind(GL_TEXTURE0);
             shader.Use();
-
-            glUniform3fv(glGetUniformLocation(shader.ID, "lightColor"), 1, glm::value_ptr(lightColor));
-            glUniform3fv(glGetUniformLocation(shader.ID, "lightPos"), 1, glm::value_ptr(lightPos));
-            glUniform1f(glGetUniformLocation(shader.ID, "ambientStrength"), ambientStrength);
-            glUniform1f(glGetUniformLocation(shader.ID, "diffuseStrength"), diffuseStrength);
-            glUniform1f(glGetUniformLocation(shader.ID, "specularStrength"), 1.0f);
-            glUniform1f(glGetUniformLocation(shader.ID, "shininess"), 32.0f);
+            light.ApplyToShader(shader);
+            material.ApplyToShader(shader);
 
             // Model transform
             glm::mat4 model = glm::mat4(1.0f);

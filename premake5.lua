@@ -108,6 +108,7 @@ project "Sandbox"
     includedirs {
         "Engine/include",
         "vendor/include",
+        "vendor/include/GLM",
     }
 
     links {
