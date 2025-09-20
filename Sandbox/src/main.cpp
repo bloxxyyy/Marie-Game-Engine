@@ -9,58 +9,13 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <Material.h>
 #include <Light.h>
+#include <Primitives.h>
 
 int main() {
     try {
         Engine engine(800, 600, "MarieEngine");
 
-        // pos(3) + uv(2) + normal(3) = 8 floats per vertex
-        std::vector<float> vertices = {
-            // positions        // tex coords // normals
-            -0.5f,-0.5f, 0.5f,   0.0f,0.0f,   0.0f,0.0f,1.0f,
-             0.5f,-0.5f, 0.5f,   1.0f,0.0f,   0.0f,0.0f,1.0f,
-             0.5f, 0.5f, 0.5f,   1.0f,1.0f,   0.0f,0.0f,1.0f,
-            -0.5f, 0.5f, 0.5f,   0.0f,1.0f,   0.0f,0.0f,1.0f,
-
-            // back face
-            -0.5f,-0.5f,-0.5f,   1.0f,0.0f,   0.0f,0.0f,-1.0f,
-             0.5f,-0.5f,-0.5f,   0.0f,0.0f,   0.0f,0.0f,-1.0f,
-             0.5f, 0.5f,-0.5f,   0.0f,1.0f,   0.0f,0.0f,-1.0f,
-            -0.5f, 0.5f,-0.5f,   1.0f,1.0f,   0.0f,0.0f,-1.0f,
-
-            // left face
-            -0.5f,-0.5f,-0.5f,   0.0f,0.0f,  -1.0f,0.0f,0.0f,
-            -0.5f,-0.5f, 0.5f,   1.0f,0.0f,  -1.0f,0.0f,0.0f,
-            -0.5f, 0.5f, 0.5f,   1.0f,1.0f,  -1.0f,0.0f,0.0f,
-            -0.5f, 0.5f,-0.5f,   0.0f,1.0f,  -1.0f,0.0f,0.0f,
-
-            // right face
-             0.5f,-0.5f,-0.5f,   1.0f,0.0f,   1.0f,0.0f,0.0f,
-             0.5f,-0.5f, 0.5f,   0.0f,0.0f,   1.0f,0.0f,0.0f,
-             0.5f, 0.5f, 0.5f,   0.0f,1.0f,   1.0f,0.0f,0.0f,
-             0.5f, 0.5f,-0.5f,   1.0f,1.0f,   1.0f,0.0f,0.0f,
-
-             // bottom face
-             -0.5f,-0.5f,-0.5f,   0.0f,1.0f,   0.0f,-1.0f,0.0f,
-              0.5f,-0.5f,-0.5f,   1.0f,1.0f,   0.0f,-1.0f,0.0f,
-              0.5f,-0.5f, 0.5f,   1.0f,0.0f,   0.0f,-1.0f,0.0f,
-             -0.5f,-0.5f, 0.5f,   0.0f,0.0f,   0.0f,-1.0f,0.0f,
-
-             // top face
-             -0.5f, 0.5f,-0.5f,   0.0f,1.0f,   0.0f,1.0f,0.0f,
-              0.5f, 0.5f,-0.5f,   1.0f,1.0f,   0.0f,1.0f,0.0f,
-              0.5f, 0.5f, 0.5f,   1.0f,0.0f,   0.0f,1.0f,0.0f,
-             -0.5f, 0.5f, 0.5f,   0.0f,0.0f,   0.0f,1.0f,0.0f
-        };
-
-        std::vector<unsigned int> indices = {
-            0,1,2, 2,3,0,       // front
-            4,5,6, 6,7,4,       // back
-            8,9,10,10,11,8,     // left
-            12,13,14,14,15,12,  // right
-            16,17,18,18,19,16,  // bottom
-            20,21,22,22,23,20   // top
-        };
+        Mesh cube = CreateCube();
 
         Texture texture("C:\\MarieEngine\\Engine\\Textures\\example.png");
         Material material(texture);
@@ -70,8 +25,6 @@ int main() {
             "C:\\MarieEngine\\Engine\\Shaders\\triangle.vert",
             "C:\\MarieEngine\\Engine\\Shaders\\triangle.frag"
         );
-
-        Mesh mesh(vertices, indices);
 
         shader.Use();
         light.ApplyToShader(shader);
@@ -108,7 +61,7 @@ int main() {
             glm::vec3 viewPos = engine.GetCamera()->Position;
             glUniform3fv(glGetUniformLocation(shader.ID, "viewPos"), 1, glm::value_ptr(viewPos));
 
-            mesh.Draw();
+            cube.Draw();
         });
     }
     catch (const std::exception& e) {
