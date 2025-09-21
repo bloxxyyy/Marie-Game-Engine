@@ -50,5 +50,28 @@ Mesh CreateCube() {
         20,21,22,22,23,20   // top
     };
 
-    return Mesh(vertices, indices);
+    return Mesh(vertices, indices, VertexFormat::LitTextured, GL_TRIANGLES);
+}
+
+Mesh CreateGizmoAxes(float length) {
+    std::vector<float> vertices = {
+        // positions            // colors
+        0.0f, 0.0f, 0.0f,       1.0f, 0.0f, 0.0f,   // X start (red)
+        length, 0.0f, 0.0f,     1.0f, 0.0f, 0.0f,   // X end
+
+        0.0f, 0.0f, 0.0f,       0.0f, 1.0f, 0.0f,   // Y start (green)
+        0.0f, length, 0.0f,     0.0f, 1.0f, 0.0f,   // Y end
+
+        0.0f, 0.0f, 0.0f,       0.0f, 0.0f, 1.0f,   // Z start (blue)
+        0.0f, 0.0f, length,     0.0f, 0.0f, 1.0f    // Z end
+    };
+
+    std::vector<unsigned int> indices = {
+        0,1,   // X axis
+        2,3,   // Y axis
+        4,5    // Z axis
+    };
+
+    // This mesh will expect 6 floats per vertex (pos3 + color3)
+    return Mesh(vertices, indices, VertexFormat::Colored, GL_LINES);
 }

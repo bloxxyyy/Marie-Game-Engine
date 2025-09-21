@@ -1,37 +1,53 @@
 #include "Mesh.h"
 #include <glad/glad.h>
 
-Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices) {
-	vertexCount = static_cast<GLsizei>(vertices.size() / 8); // 8 floats per vertex (position + uv = 2 + normal = 3)
-    indexCount = static_cast<GLsizei>(indices.size());
+Mesh::Mesh(const std::vector<float>& vertices,
+    const std::vector<unsigned int>& indices,
+    VertexFormat fmt,
+    GLenum mode)
+    : format(fmt), drawMode(mode)
+{
     useEBO = !indices.empty();
+    vertexCount = static_cast<GLsizei>(vertices.size() /
+        (format == VertexFormat::LitTextured ? 8 : 6));
+    indexCount = static_cast<GLsizei>(indices.size());
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    if (useEBO) glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
 
-    // Upload vertices
+    // Upload vertex data
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
+    // Upload indices if present
     if (useEBO) {
-        glGenBuffers(1, &EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
     }
 
-    // Positions
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // Texture coordinates
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // normal
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    // Set up vertex attributes
+    if (format == VertexFormat::LitTextured) {
+        // Position
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        // Texcoords
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        // Normal
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+    }
+    else if (format == VertexFormat::Colored) {
+        // Position
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        // Color
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+    }
 
     glBindVertexArray(0);
 }
@@ -45,8 +61,8 @@ Mesh::~Mesh() {
 void Mesh::Draw() const {
     glBindVertexArray(VAO);
     if (useEBO)
-        glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+        glDrawElements(drawMode, indexCount, GL_UNSIGNED_INT, 0);
     else
-        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+        glDrawArrays(drawMode, 0, vertexCount);
     glBindVertexArray(0);
 }

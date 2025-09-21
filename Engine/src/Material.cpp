@@ -6,6 +6,6 @@ void Material::ApplyToShader(const Shader& shader) const {
     if (texture) {
         glActiveTexture(GL_TEXTURE0);
         texture->Bind(GL_TEXTURE0);
-        shader.SetInt("texture1", 0); // sampler binding
+        shader.SetInt("texture1", 0);
     }
 }
