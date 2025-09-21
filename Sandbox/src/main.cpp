@@ -15,9 +15,9 @@ int main() {
     try {
         Engine engine(800, 600, "MarieEngine");
 
-        /*
+        
         Mesh cube = CreateCube();
-        Texture texture("C:\\MarieEngine\\Engine\\Textures\\example.png");
+        auto texture = std::make_shared<Texture>("C:\\MarieEngine\\Engine\\Textures\\example.png");
         Material material(texture);
         Light light({ 0,0,1 }, { 1,1,1 }, 0.1f, 1.0f, 1.0f);
 
@@ -27,27 +27,29 @@ int main() {
         );
 
 
-        shader.Use();
-        light.ApplyToShader(shader);
-        material.ApplyToShader(shader);
-        */
+        //shader.Use();
+        //light.ApplyToShader(shader);
+        //material.ApplyToShader(shader);
+        
 
         //glUniform1i(glGetUniformLocation(shader.ID, "texture1"), 0);
 
+        /*
 		Mesh transformGizmo = CreateGizmoAxes(1.0f);
         Shader shader(
             "C:\\MarieEngine\\Engine\\Shaders\\gizmo.vert",
             "C:\\MarieEngine\\Engine\\Shaders\\gizmo.frag"
         );
         shader.Use();
+        */
 
 
         // Run the engine loop, pass a lambda to render each frame
         engine.Run([&]() {
             //texture.Bind(GL_TEXTURE0);
             shader.Use();
-            //light.ApplyToShader(shader);
-            //material.ApplyToShader(shader);
+            light.ApplyToShader(shader);
+            material.ApplyToShader(shader);
 
             // Model transform
             glm::mat4 model = glm::mat4(1.0f);
@@ -71,8 +73,8 @@ int main() {
             glm::vec3 viewPos = engine.GetCamera()->Position;
             glUniform3fv(glGetUniformLocation(shader.ID, "viewPos"), 1, glm::value_ptr(viewPos));
 
-            //cube.Draw();
-			transformGizmo.Draw();
+            cube.Draw();
+			//transformGizmo.Draw();
         });
     }
     catch (const std::exception& e) {

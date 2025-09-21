@@ -25,7 +25,32 @@ Texture::Texture(const std::string& path, bool flipVertically) {
 }
 
 Texture::~Texture() {
-    glDeleteTextures(1, &ID);
+    if (ID != 0) {
+        glDeleteTextures(1, &ID);
+    }
+}
+
+Texture::Texture(Texture&& other) noexcept: ID(other.ID), width(other.width), height(other.height), nrChannels(other.nrChannels)
+{
+    other.ID = 0;
+}
+
+Texture& Texture::operator=(Texture&& other) noexcept {
+    if (this != &other) {
+
+        if (ID != 0) {
+            glDeleteTextures(1, &ID);
+        }
+
+        ID = other.ID;
+        width = other.width;
+        height = other.height;
+        nrChannels = other.nrChannels;
+
+        // Invalidate the moved-from object
+        other.ID = 0;
+    }
+    return *this;
 }
 
 void Texture::Bind(GLenum textureUnit) const {
