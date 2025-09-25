@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <GUI/Panels/MonitoringPanel.h>
+#include <GUI/Panels/LightEditorPanel.h>
 
 Engine::Engine(int width, int height, const std::string& title) {
     if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
@@ -30,10 +31,35 @@ Engine::Engine(int width, int height, const std::string& title) {
 
     // Initialize GUI manager and panels
     stats = std::make_unique<EngineStats>();
+
     guiManager = std::make_unique<GuiManager>(window);
+
+    guiManager->AddPanel<LightEditorPanel>(m_LightDataCache);
     guiManager->AddPanel<MonitoringPanel>(*stats);
 
     monitorManager = std::make_unique<Win_Monitoring>();
+}
+
+void Engine::RegisterEditableLight(Light* light) {
+    m_EditableLight = light;
+}
+
+void Engine::SyncLightData() {
+    if (!m_EditableLight) return;
+
+    m_EditableLight->position = m_LightDataCache.position;
+    m_EditableLight->color = m_LightDataCache.color;
+    m_EditableLight->ambientStrength = m_LightDataCache.ambientStrength;
+    m_EditableLight->diffuseStrength = m_LightDataCache.diffuseStrength;
+    m_EditableLight->specularStrength = m_LightDataCache.specularStrength;
+    m_EditableLight->shininess = m_LightDataCache.shininess;
+
+    m_LightDataCache.position = m_EditableLight->position;
+    m_LightDataCache.color = m_EditableLight->color;
+    m_LightDataCache.ambientStrength = m_EditableLight->ambientStrength;
+    m_LightDataCache.diffuseStrength = m_EditableLight->diffuseStrength;
+    m_LightDataCache.specularStrength = m_EditableLight->specularStrength;
+    m_LightDataCache.shininess = m_EditableLight->shininess;
 }
 
 Engine::~Engine() {
@@ -100,6 +126,7 @@ void Engine::Run(const std::function<void()>& renderCallback) {
         // Start GUI frame
         guiManager->BeginFrame();
         guiManager->RenderPanels();
+        SyncLightData();
         guiManager->EndFrame();
         glfwMakeContextCurrent(window);
 

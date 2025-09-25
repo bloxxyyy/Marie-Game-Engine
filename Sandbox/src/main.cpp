@@ -36,6 +36,7 @@ int main() {
 
 
         Light light({ 0,0,1 }, { 1,1,1 }, 0.1f, 1.0f, 1.0f);
+        engine.RegisterEditableLight(&light);
 
         Shader shader(
             "C:\\MarieEngine\\Engine\\Shaders\\triangle.vert",
