@@ -16,12 +16,10 @@
 
 #include "Camera.h"
 #include "Input.h"
-
 #include "GUI/Data/EngineStats.h"
 #include "GUI/GuiManager.h"
 #include "Monitoring/Win_Monitoring.h"
 #include <Light.h>
-#include <GUI/Data/LightData.h>
 
 class Engine {
 public:
@@ -29,6 +27,7 @@ public:
     ~Engine();
 
     void Run(const std::function<void()>& renderCallback);
+    void RegisterEditableLight(Light* light);
 
     Input* GetInput() { return input.get(); }
     Camera* GetCamera() { return camera.get(); }
@@ -36,13 +35,10 @@ public:
     glm::mat4 GetCameraViewMatrix() const { return camera->GetViewMatrix(); }
     glm::mat4 GetCameraProjectionMatrix() const;
 
-    void RegisterEditableLight(Light* light);
-
     float GetDeltaTime() const { return deltaTime; }
 
 private:
     void InitGL();
-    void SyncLightData();
 
     GLFWwindow* window = nullptr;
 
@@ -50,7 +46,6 @@ private:
     std::unique_ptr<Camera> camera;
 
     Light* m_EditableLight = nullptr;
-    LightData m_LightDataCache;
 
     std::unique_ptr<EngineStats> stats;
     std::unique_ptr<GuiManager> guiManager;

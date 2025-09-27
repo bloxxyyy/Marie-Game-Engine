@@ -2,7 +2,7 @@
 #include "imgui.h"
 #include <GUI/Theme/DefaultTheme.h>
 
-MonitoringPanel::MonitoringPanel(EngineStats& s) : stats(s) {}
+MonitoringPanel::MonitoringPanel(EngineStats& data) : m_Data(data) {}
 
 void MonitoringPanel::OnImGuiRender()
 {
@@ -48,14 +48,14 @@ void MonitoringPanel::OnImGuiRender()
     // ----- FPS Section -----
     HeaderTitle("FPS");
 
-    ImVec4 fpsColor = stats.fps < 15.0f ? ImVec4(1, 0, 0, 1) : (stats.fps < 30.0f ? ImVec4(1, 0.5f, 0, 1) : ImVec4(0, 1, 0, 1));
-    DrawValue("Instant FPS", stats.fps, fpsColor);
+    ImVec4 fpsColor = m_Data.fps < 15.0f ? ImVec4(1, 0, 0, 1) : (m_Data.fps < 30.0f ? ImVec4(1, 0.5f, 0, 1) : ImVec4(0, 1, 0, 1));
+    DrawValue("Instant FPS", m_Data.fps, fpsColor);
 
-    ImVec4 avgFpsColor = stats.avgFPS < 15.0f ? ImVec4(1, 0, 0, 1) : (stats.avgFPS < 30.0f ? ImVec4(1, 0.5f, 0, 1) : ImVec4(0, 1, 0, 1));
-    DrawValue("Avg FPS", stats.avgFPS, avgFpsColor);
+    ImVec4 avgFpsColor = m_Data.avgFPS < 15.0f ? ImVec4(1, 0, 0, 1) : (m_Data.avgFPS < 30.0f ? ImVec4(1, 0.5f, 0, 1) : ImVec4(0, 1, 0, 1));
+    DrawValue("Avg FPS", m_Data.avgFPS, avgFpsColor);
 
-    ImVec4 deltaColor = ((stats.deltaTime * 1000.0f) > 66.6f) ? ImVec4(1, 0, 0, 1) : (((stats.deltaTime * 1000.0f) > 33.3f) ? ImVec4(1, 0.5f, 0, 1) : ImVec4(0, 1, 0, 1));
-    DrawValue("Frame Time", stats.deltaTime * 1000.0f, deltaColor, "%.2f ms");
+    ImVec4 deltaColor = ((m_Data.deltaTime * 1000.0f) > 66.6f) ? ImVec4(1, 0, 0, 1) : (((m_Data.deltaTime * 1000.0f) > 33.3f) ? ImVec4(1, 0.5f, 0, 1) : ImVec4(0, 1, 0, 1));
+    DrawValue("Frame Time", m_Data.deltaTime * 1000.0f, deltaColor, "%.2f ms");
 
     // Margin before next section
     ImGui::Dummy(ImVec2(0.0f, 8.0f));
@@ -63,8 +63,8 @@ void MonitoringPanel::OnImGuiRender()
     // ----- CPU Section -----
     HeaderTitle("CPU");
 
-    ImVec4 cpuColor = stats.cpuUsage > 80.0f ? ImVec4(1, 0, 0, 1) : (stats.cpuUsage > 50.0f ? ImVec4(1, 0.5f, 0, 1) : ImVec4(0, 1, 0, 1));
-    DrawValue("CPU Usage", stats.cpuUsage, cpuColor, "%.1f%%");
+    ImVec4 cpuColor = m_Data.cpuUsage > 80.0f ? ImVec4(1, 0, 0, 1) : (m_Data.cpuUsage > 50.0f ? ImVec4(1, 0.5f, 0, 1) : ImVec4(0, 1, 0, 1));
+    DrawValue("CPU Usage", m_Data.cpuUsage, cpuColor, "%.1f%%");
 
     ImGui::End();
 }

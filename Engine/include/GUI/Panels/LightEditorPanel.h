@@ -4,6 +4,7 @@
 
 class LightEditorPanel : public IPanel {
 public:
+    using DataType = LightData;
     LightEditorPanel(LightData& data);
     void OnImGuiRender() override;
 

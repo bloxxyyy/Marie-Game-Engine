@@ -4,8 +4,10 @@
 #include <stdexcept>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <GUI/Panels/MonitoringPanel.h>
+#include <GUI/GuiManager.h>
+#include <GUI/Data/LightData.h>
 #include <GUI/Panels/LightEditorPanel.h>
+#include <GUI/Panels/MonitoringPanel.h>
 
 Engine::Engine(int width, int height, const std::string& title) {
     if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
@@ -28,38 +30,12 @@ Engine::Engine(int width, int height, const std::string& title) {
     Input::Initialize(window);
 
     camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
-
-    // Initialize GUI manager and panels
     stats = std::make_unique<EngineStats>();
-
     guiManager = std::make_unique<GuiManager>(window);
-
-    guiManager->AddPanel<LightEditorPanel>(m_LightDataCache);
-    guiManager->AddPanel<MonitoringPanel>(*stats);
-
     monitorManager = std::make_unique<Win_Monitoring>();
-}
 
-void Engine::RegisterEditableLight(Light* light) {
-    m_EditableLight = light;
-}
-
-void Engine::SyncLightData() {
-    if (!m_EditableLight) return;
-
-    m_EditableLight->position = m_LightDataCache.position;
-    m_EditableLight->color = m_LightDataCache.color;
-    m_EditableLight->ambientStrength = m_LightDataCache.ambientStrength;
-    m_EditableLight->diffuseStrength = m_LightDataCache.diffuseStrength;
-    m_EditableLight->specularStrength = m_LightDataCache.specularStrength;
-    m_EditableLight->shininess = m_LightDataCache.shininess;
-
-    m_LightDataCache.position = m_EditableLight->position;
-    m_LightDataCache.color = m_EditableLight->color;
-    m_LightDataCache.ambientStrength = m_EditableLight->ambientStrength;
-    m_LightDataCache.diffuseStrength = m_EditableLight->diffuseStrength;
-    m_LightDataCache.specularStrength = m_EditableLight->specularStrength;
-    m_LightDataCache.shininess = m_EditableLight->shininess;
+    guiManager->AddPanel<LightEditorPanel>();
+    guiManager->AddPanel<MonitoringPanel>();
 }
 
 Engine::~Engine() {
@@ -68,6 +44,10 @@ Engine::~Engine() {
 
     glfwDestroyWindow(window);
     glfwTerminate();
+}
+
+void Engine::RegisterEditableLight(Light* light) {
+    m_EditableLight = light;
 }
 
 void Engine::InitGL() {
@@ -81,55 +61,64 @@ glm::mat4 Engine::GetCameraProjectionMatrix() const {
 }
 
 void Engine::Run(const std::function<void()>& renderCallback) {
-    float fpsAccumulator = 0.0f;
-    int frameCount = 0;
-
     while (!glfwWindowShouldClose(window)) {
 
         float currentFrame = static_cast<float>(glfwGetTime());
         FrameStats frameStats = monitorManager->UpdateFrameTiming(currentFrame);
         deltaTime = frameStats.deltaTime;
-
-		stats->avgFPS = frameStats.avgFPS;
+        stats->avgFPS = frameStats.avgFPS;
         stats->fps = frameStats.fps;
-		stats->deltaTime = frameStats.deltaTime;
-
+        stats->deltaTime = frameStats.deltaTime;
         stats->cpuUsage = monitorManager->GetCPUUsage(deltaTime);
 
-        // Input handling
         Input::Get().Update();
-
         if (Input::Get().IsMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-
             camera->ProcessMouseMovement(
                 static_cast<float>(Input::Get().GetDeltaX()),
                 static_cast<float>(Input::Get().GetDeltaY())
             );
-
             Input::Get().ResetDeltas();
         }
         else {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
-
         camera->Update(deltaTime);
         Input::Get().ResetDeltas();
-
         if (Input::Get().IsKeyDown(GLFW_KEY_ESCAPE))
             glfwSetWindowShouldClose(window, true);
+
+        if (m_EditableLight) {
+            LightData currentLightData;
+            currentLightData.position = m_EditableLight->position;
+            currentLightData.color = m_EditableLight->color;
+            currentLightData.ambientStrength = m_EditableLight->ambientStrength;
+            currentLightData.diffuseStrength = m_EditableLight->diffuseStrength;
+            currentLightData.specularStrength = m_EditableLight->specularStrength;
+            currentLightData.shininess = m_EditableLight->shininess;
+            guiManager->SetData<LightData>(currentLightData);
+        }
+
+        guiManager->SetData<EngineStats>(*stats);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderCallback();
 
-        // Start GUI frame
         guiManager->BeginFrame();
         guiManager->RenderPanels();
-        SyncLightData();
         guiManager->EndFrame();
-        glfwMakeContextCurrent(window);
 
+        if (m_EditableLight) {
+            const LightData& modifiedLightData = guiManager->GetData<LightData>();
+            m_EditableLight->position = modifiedLightData.position;
+            m_EditableLight->color = modifiedLightData.color;
+            m_EditableLight->ambientStrength = modifiedLightData.ambientStrength;
+            m_EditableLight->diffuseStrength = modifiedLightData.diffuseStrength;
+            m_EditableLight->specularStrength = modifiedLightData.specularStrength;
+            m_EditableLight->shininess = modifiedLightData.shininess;
+        }
+
+        glfwMakeContextCurrent(window);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

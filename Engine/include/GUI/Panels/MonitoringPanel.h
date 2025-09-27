@@ -3,8 +3,11 @@
 #include "GUI/Data/EngineStats.h"
 
 class MonitoringPanel : public IPanel {
-    EngineStats& stats;
 public:
-    MonitoringPanel(EngineStats& s);
+    using DataType = EngineStats;
+    MonitoringPanel(EngineStats& data);
     void OnImGuiRender() override;
+
+private:
+    EngineStats& m_Data;
 };
