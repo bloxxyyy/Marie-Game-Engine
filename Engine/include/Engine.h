@@ -20,6 +20,7 @@
 #include "GUI/GuiManager.h"
 #include "Monitoring/Win_Monitoring.h"
 #include <Light.h>
+#include <ECS/ECSRegistry.h>
 
 class Engine {
 public:
@@ -37,6 +38,8 @@ public:
 
     float GetDeltaTime() const { return deltaTime; }
 
+    ECSRegistry& GetRegistry() { return *m_Registry; }
+
 private:
     void InitGL();
 
@@ -44,6 +47,8 @@ private:
 
     std::unique_ptr<Input> input;
     std::unique_ptr<Camera> camera;
+
+    std::unique_ptr<ECSRegistry> m_Registry;
 
     Light* m_EditableLight = nullptr;
 

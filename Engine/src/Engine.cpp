@@ -30,6 +30,8 @@ Engine::Engine(int width, int height, const std::string& title) {
     Input::Initialize(window);
 
     camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
+    m_Registry = std::make_unique<ECSRegistry>();
+
     stats = std::make_unique<EngineStats>();
     guiManager = std::make_unique<GuiManager>(window);
     monitorManager = std::make_unique<Win_Monitoring>();
@@ -104,6 +106,10 @@ void Engine::Run(const std::function<void()>& renderCallback) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderCallback();
 
+        // Update all  systems
+        m_Registry->Update(deltaTime);
+
+        // GUI Rendering
         guiManager->BeginFrame();
         guiManager->RenderPanels();
         guiManager->EndFrame();

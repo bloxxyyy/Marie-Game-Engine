@@ -9,3 +9,9 @@ Entity ECSRegistry::CreateEntity() {
     // For now, a simple incrementing ID.
     return m_NextEntityID++;
 }
+
+void ECSRegistry::Update(float deltaTime) {
+    for (auto& system : m_Systems) {
+        system->Update(*this, deltaTime);
+    }
+}

@@ -6,7 +6,9 @@
 #include "Material.h" // Needed for material->ApplyToShader
 #include "Mesh.h"     // Needed for mesh->Draw
 
-void RenderSystem::Update(ECSRegistry& registry, Shader& shader) {
+RenderSystem::RenderSystem(Shader& shader) : m_Shader(shader) {}
+
+void RenderSystem::Update(ECSRegistry& registry, float deltaTime) {
     auto& transformMap = registry.GetComponentMap<TransformComponent>();
     auto& renderableMap = registry.GetComponentMap<RenderComponent>();
 
@@ -15,11 +17,11 @@ void RenderSystem::Update(ECSRegistry& registry, Shader& shader) {
             auto& transformComp = transformMap.at(entity);
 
             if (renderComp.material) {
-                renderComp.material->ApplyToShader(shader);
+                renderComp.material->ApplyToShader(m_Shader);
 
             }
 
-            shader.SetMat4("model", transformComp.GetModelMatrix());
+            m_Shader.SetMat4("model", transformComp.GetModelMatrix());
 
             if (renderComp.mesh) {
                 renderComp.mesh->Draw();

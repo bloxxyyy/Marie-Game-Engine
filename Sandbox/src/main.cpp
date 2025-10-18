@@ -14,15 +14,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <ECS/ECSRegistry.h>
-#include <ECS/RenderSystem.h>
 #include <ECS/Components.h>
+#include <ECS/RenderSystem.h>
 
 int main() {
     try {
         Engine engine(800, 600, "MarieEngine");
 
-        ECSRegistry registry;
-        RenderSystem renderSystem;
+        ECSRegistry& registry = engine.GetRegistry();
 
         auto cubeMesh = std::make_shared<Mesh>(CreateCube());
         auto texture = std::make_shared<Texture>("C:\\MarieEngine\\Engine\\Textures\\example.png");
@@ -45,6 +44,8 @@ int main() {
             "C:\\MarieEngine\\Engine\\Shaders\\triangle.vert",
             "C:\\MarieEngine\\Engine\\Shaders\\triangle.frag"
         );
+
+        registry.RegisterSystem<RenderSystem>(shader);
 
 
         //shader.Use();
@@ -82,9 +83,7 @@ int main() {
 
             auto& cube2Transform = registry.GetComponent<TransformComponent>(cube2);
             cube2Transform.rotation.x += 0.5f;
-
-            renderSystem.Update(registry,  shader);
-
+               
             //transformGizmo.Draw();
         });
     }
