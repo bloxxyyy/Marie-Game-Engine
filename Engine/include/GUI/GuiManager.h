@@ -40,7 +40,18 @@ public:
 
     template<typename TData>
     void SetData(const TData& data) {
-        m_DataHub[std::type_index(typeid(TData))] = data;
+        // First, make sure an entry for this data type exists.
+        auto it = m_DataHub.find(std::type_index(typeid(TData)));
+        if (it == m_DataHub.end()) {
+            // If not, create it.
+            m_DataHub[std::type_index(typeid(TData))] = data;
+        }
+        else {
+            // If it exists, get a reference to the object INSIDE the std::any...
+            auto& dataCache = std::any_cast<TData&>(it->second);
+            // ...and UPDATE it, instead of replacing the std::any itself.
+            dataCache = data;
+        }
     }
 
     template<typename TData>
