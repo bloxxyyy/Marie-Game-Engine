@@ -8,6 +8,8 @@
 #include <GUI/Data/LightData.h>
 #include <GUI/Panels/LightEditorPanel.h>
 #include <GUI/Panels/MonitoringPanel.h>
+#include <GUI/Panels/EntitiesPanel.h>
+#include <ECS/Components.h>
 
 Engine::Engine(int width, int height, const std::string& title) {
     if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
@@ -38,6 +40,7 @@ Engine::Engine(int width, int height, const std::string& title) {
 
     guiManager->AddPanel<LightEditorPanel>();
     guiManager->AddPanel<MonitoringPanel>();
+    guiManager->AddPanel<EntitiesPanel>();
 }
 
 Engine::~Engine() {
@@ -85,10 +88,27 @@ void Engine::Run(const std::function<void()>& renderCallback) {
         else {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
+
         camera->Update(deltaTime);
         Input::Get().ResetDeltas();
         if (Input::Get().IsKeyDown(GLFW_KEY_ESCAPE))
             glfwSetWindowShouldClose(window, true);
+
+
+        // Get the latest selected entity from the previous frame to preserve selection
+        Entity selectedEntity = NULL_ENTITY;
+        // Use a try-catch block in case the panel hasn't been created yet on the first frame
+        try {
+            selectedEntity = guiManager->GetData<EntityListData>().selectedEntity;
+        }
+        catch (const std::out_of_range& e) { /* Do nothing, no data yet */ }
+        EntityListData entityData;
+        entityData.selectedEntity = selectedEntity;
+        auto& tagMap = m_Registry->GetComponentMap<TagComponent>();
+        for (auto const& [entity, tagComp] : tagMap) {
+            entityData.entities.push_back({ entity, tagComp.tag });
+        }
+        guiManager->SetData<EntityListData>(entityData);
 
         if (m_EditableLight) {
             LightData currentLightData;

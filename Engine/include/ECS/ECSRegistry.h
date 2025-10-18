@@ -11,6 +11,7 @@
 
 using Entity = std::uint32_t;
 const Entity MAX_ENTITIES = 5000;
+const Entity NULL_ENTITY = std::numeric_limits<Entity>::max();
 
 class ECSRegistry {
 public:
