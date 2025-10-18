@@ -10,6 +10,7 @@
 #include <GUI/Panels/MonitoringPanel.h>
 #include <GUI/Panels/EntitiesPanel.h>
 #include <ECS/Components.h>
+#include <GUI/Panels/ComponentsPanel.h>
 
 Engine::Engine(int width, int height, const std::string& title) {
     if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
@@ -41,6 +42,7 @@ Engine::Engine(int width, int height, const std::string& title) {
     guiManager->AddPanel<LightEditorPanel>();
     guiManager->AddPanel<MonitoringPanel>();
     guiManager->AddPanel<EntitiesPanel>();
+    guiManager->AddPanel<ComponentsPanel>();
 }
 
 Engine::~Engine() {
@@ -109,6 +111,27 @@ void Engine::Run(const std::function<void()>& renderCallback) {
             entityData.entities.push_back({ entity, tagComp.tag });
         }
         guiManager->SetData<EntityListData>(entityData);
+
+
+        ComponentInspectorData inspectorData;
+        inspectorData.selectedEntity = selectedEntity;
+        if (selectedEntity != NULL_ENTITY) {
+            
+            // The Engine does the work of getting the components.
+            if (m_Registry->HasComponent<TagComponent>(selectedEntity)) {
+                inspectorData.tag = m_Registry->GetComponent<TagComponent>(selectedEntity);
+            }
+            if (m_Registry->HasComponent<TransformComponent>(selectedEntity)) {
+                inspectorData.transform = m_Registry->GetComponent<TransformComponent>(selectedEntity);
+            }
+            if (m_Registry->HasComponent<RenderComponent>(selectedEntity)) {
+                inspectorData.render = m_Registry->GetComponent<RenderComponent>(selectedEntity);
+            }
+        }
+        guiManager->SetData<ComponentInspectorData>(inspectorData);
+
+
+
 
         if (m_EditableLight) {
             LightData currentLightData;

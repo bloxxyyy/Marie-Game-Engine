@@ -5,7 +5,6 @@
 #include "Material.h"
 #include "Light.h"
 #include "Primitives.h"
-#include "SceneObject.h"
 
 #include <vector>
 #include <iostream>
@@ -36,6 +35,10 @@ int main() {
         registry.AddComponent(cube2, TagComponent{ "Cube B" });
         registry.AddComponent(cube2, RenderComponent{ cubeMesh, sharedMaterial });
         registry.AddComponent(cube2, TransformComponent{ {1.0f, 0.0f, 0.0f}, {}, {0.7f, 0.7f, 0.7f} });
+
+        //Entity cube3 = registry.CreateEntity();
+        //registry.AddComponent(cube3, TagComponent{ "Hidden Cube" });
+        //registry.AddComponent(cube3, TransformComponent{ {1.0f, 0.0f, 0.0f}, {}, {0.7f, 0.7f, 0.7f} });
 
         Light light({ 0,0,1 }, { 1,1,1 }, 0.1f, 1.0f, 1.0f);
         engine.RegisterEditableLight(&light);
