@@ -1,4 +1,4 @@
-#include "GUI/Panels/LightEditorPanel.h"
+#include "GUI/LightEditor/LightEditorPanel.h"
 #include "imgui.h"
 
 LightEditorPanel::LightEditorPanel(LightData& data) : m_Data(data) {}

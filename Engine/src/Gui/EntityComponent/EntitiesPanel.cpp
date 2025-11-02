@@ -1,4 +1,4 @@
-#include "GUI/Panels/EntitiesPanel.h"
+#include "GUI/EntityComponent/EntitiesPanel.h"
 #include "imgui.h"
 
 EntitiesPanel::EntitiesPanel(DataType& data) : m_Data(data) {}

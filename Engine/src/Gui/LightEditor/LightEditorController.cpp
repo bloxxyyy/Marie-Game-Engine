@@ -1,5 +1,5 @@
-#include "GUI/Panels/LightEditorController.h"
-#include "GUI/Panels/LightEditorPanel.h"
+#include "GUI/LightEditor/LightEditorController.h"
+#include "GUI/LightEditor/LightEditorPanel.h"
 #include "Light.h"
 
 LightEditorController::LightEditorController(Light& targetLight)  : m_TargetLight(targetLight)

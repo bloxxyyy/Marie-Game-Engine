@@ -1,5 +1,5 @@
 #pragma once
-#include "GUI/Panels/IPanelView.h"
+#include "GUI/IPanelView.h"
 #include "GUI/Data/EngineStats.h"
 
 class MonitoringPanel : public IPanelView {

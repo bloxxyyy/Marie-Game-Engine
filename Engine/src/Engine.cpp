@@ -6,12 +6,15 @@
 
 #include <GUI/GuiManager.h>
 #include <GUI/Data/LightData.h>
-#include <GUI/Panels/LightEditorPanel.h>
-#include <GUI/Panels/MonitoringPanel.h>
-#include <GUI/Panels/EntitiesPanel.h>
+#include <GUI/LightEditor/LightEditorPanel.h>
+#include <GUI/Monitoring/MonitoringPanel.h>
+#include <GUI/EntityComponent/EntitiesPanel.h>
 #include <ECS/Components.h>
-#include <GUI/Panels/ComponentsPanel.h>
-#include <GUI/Panels/LightEditorController.h>
+#include <GUI/EntityComponent/ComponentsPanel.h>
+#include <GUI/LightEditor/LightEditorController.h>
+#include <GUI/Monitoring/MonitoringController.h>
+#include <GUI/EntityComponent/EntitiesController.h>
+#include <GUI/EntityComponent/ComponentsController.h>
 
 Engine::Engine(int width, int height, const std::string& title) {
     if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
@@ -40,11 +43,9 @@ Engine::Engine(int width, int height, const std::string& title) {
     guiManager = std::make_unique<GuiManager>(window);
     monitorManager = std::make_unique<Win_Monitoring>();
 
-
-    //guiManager->AddPanel<LightEditorPanel>();
-    //guiManager->AddPanel<MonitoringPanel>();
-   // guiManager->AddPanel<EntitiesPanel>();
-   //guiManager->AddPanel<ComponentsPanel>();
+    guiManager->AddController<MonitoringController>(*stats);
+    auto* entitiesController = guiManager->AddController<EntitiesPanelController>(*m_Registry);
+    guiManager->AddController<ComponentsPanelController>(*m_Registry, entitiesController->GetViewData());
 }
 
 Engine::~Engine() {
@@ -98,40 +99,6 @@ void Engine::Run(const std::function<void()>& renderCallback) {
         Input::Get().ResetDeltas();
         if (Input::Get().IsKeyDown(GLFW_KEY_ESCAPE))
             glfwSetWindowShouldClose(window, true);
-
-
-        // Get the latest selected entity from the previous frame to preserve selection
-        //Entity selectedEntity = NULL_ENTITY;
-        // Use a try-catch block in case the panel hasn't been created yet on the first frame
-       /* try {
-            selectedEntity = guiManager->GetData<EntityListData>().selectedEntity;
-        }
-        catch (const std::out_of_range& e) { /* Do nothing, no data yet */ /* }
-        EntityListData entityData;
-        entityData.selectedEntity = selectedEntity;
-        auto& tagMap = m_Registry->GetComponentMap<TagComponent>();
-        for (auto const& [entity, tagComp] : tagMap) {
-            entityData.entities.push_back({ entity, tagComp.tag });
-        }
-        guiManager->SetData<EntityListData>(entityData);*/
-
-        /*
-        ComponentInspectorData inspectorData;
-        inspectorData.selectedEntity = selectedEntity;
-        if (selectedEntity != NULL_ENTITY) {
-            
-            if (m_Registry->HasComponent<TagComponent>(selectedEntity)) {
-                inspectorData.tag = m_Registry->GetComponent<TagComponent>(selectedEntity);
-            }
-            if (m_Registry->HasComponent<TransformComponent>(selectedEntity)) {
-                inspectorData.transform = m_Registry->GetComponent<TransformComponent>(selectedEntity);
-            }
-            if (m_Registry->HasComponent<RenderComponent>(selectedEntity)) {
-                inspectorData.render = m_Registry->GetComponent<RenderComponent>(selectedEntity);
-            }
-        }
-        guiManager->SetData<ComponentInspectorData>(inspectorData);
-        */
  
         guiManager->UpdateControllersPush();
 

@@ -2,13 +2,13 @@
 
 #include <vector>
 #include <memory>
-#include "GUI/Panels/IPanelView.h"
+#include "GUI/IPanelView.h"
 #include <GLFW/glfw3.h>
 
 #include <map>
 #include <typeindex>
 #include <any>
-#include "Panels/IPanelController.h"
+#include "IPanelController.h"
 
 class GuiManager
 {

@@ -1,5 +1,5 @@
 #pragma once
-#include "GUI/Panels/IPanelController.h"
+#include "GUI/IPanelController.h"
 #include "GUI/Data/LightData.h"
 #include <memory>
 

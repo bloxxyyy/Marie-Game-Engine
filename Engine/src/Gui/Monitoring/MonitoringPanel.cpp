@@ -1,4 +1,4 @@
-#include "GUI/Panels/MonitoringPanel.h"
+#include "GUI/Monitoring/MonitoringPanel.h"
 #include "imgui.h"
 #include <GUI/Theme/DefaultTheme.h>
 

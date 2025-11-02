@@ -1,5 +1,5 @@
 #pragma once
-#include "GUI/Panels/IPanelView.h"
+#include "GUI/IPanelView.h"
 #include "GUI/Data/EntityListData.h"
 
 class EntitiesPanel : public IPanelView {

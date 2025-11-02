@@ -1,4 +1,4 @@
-#include "GUI/Panels/ComponentsPanel.h"
+#include "GUI/EntityComponent/ComponentsPanel.h"
 #include "imgui.h"
 #include "imgui_stdlib.h"
 
