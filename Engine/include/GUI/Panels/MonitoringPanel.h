@@ -1,8 +1,8 @@
 #pragma once
-#include "GUI/Panels/IPanel.h"
+#include "GUI/Panels/IPanelView.h"
 #include "GUI/Data/EngineStats.h"
 
-class MonitoringPanel : public IPanel {
+class MonitoringPanel : public IPanelView {
 public:
     using DataType = EngineStats;
     MonitoringPanel(EngineStats& data);

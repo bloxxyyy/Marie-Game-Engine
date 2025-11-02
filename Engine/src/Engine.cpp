@@ -11,6 +11,7 @@
 #include <GUI/Panels/EntitiesPanel.h>
 #include <ECS/Components.h>
 #include <GUI/Panels/ComponentsPanel.h>
+#include <GUI/Panels/LightEditorController.h>
 
 Engine::Engine(int width, int height, const std::string& title) {
     if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
@@ -39,10 +40,11 @@ Engine::Engine(int width, int height, const std::string& title) {
     guiManager = std::make_unique<GuiManager>(window);
     monitorManager = std::make_unique<Win_Monitoring>();
 
-    guiManager->AddPanel<LightEditorPanel>();
-    guiManager->AddPanel<MonitoringPanel>();
-    guiManager->AddPanel<EntitiesPanel>();
-    guiManager->AddPanel<ComponentsPanel>();
+
+    //guiManager->AddPanel<LightEditorPanel>();
+    //guiManager->AddPanel<MonitoringPanel>();
+   // guiManager->AddPanel<EntitiesPanel>();
+   //guiManager->AddPanel<ComponentsPanel>();
 }
 
 Engine::~Engine() {
@@ -55,6 +57,7 @@ Engine::~Engine() {
 
 void Engine::RegisterEditableLight(Light* light) {
     m_EditableLight = light;
+    guiManager->AddController<LightEditorController>(*m_EditableLight);
 }
 
 void Engine::InitGL() {
@@ -98,26 +101,25 @@ void Engine::Run(const std::function<void()>& renderCallback) {
 
 
         // Get the latest selected entity from the previous frame to preserve selection
-        Entity selectedEntity = NULL_ENTITY;
+        //Entity selectedEntity = NULL_ENTITY;
         // Use a try-catch block in case the panel hasn't been created yet on the first frame
-        try {
+       /* try {
             selectedEntity = guiManager->GetData<EntityListData>().selectedEntity;
         }
-        catch (const std::out_of_range& e) { /* Do nothing, no data yet */ }
+        catch (const std::out_of_range& e) { /* Do nothing, no data yet */ /* }
         EntityListData entityData;
         entityData.selectedEntity = selectedEntity;
         auto& tagMap = m_Registry->GetComponentMap<TagComponent>();
         for (auto const& [entity, tagComp] : tagMap) {
             entityData.entities.push_back({ entity, tagComp.tag });
         }
-        guiManager->SetData<EntityListData>(entityData);
+        guiManager->SetData<EntityListData>(entityData);*/
 
-
+        /*
         ComponentInspectorData inspectorData;
         inspectorData.selectedEntity = selectedEntity;
         if (selectedEntity != NULL_ENTITY) {
             
-            // The Engine does the work of getting the components.
             if (m_Registry->HasComponent<TagComponent>(selectedEntity)) {
                 inspectorData.tag = m_Registry->GetComponent<TagComponent>(selectedEntity);
             }
@@ -129,43 +131,17 @@ void Engine::Run(const std::function<void()>& renderCallback) {
             }
         }
         guiManager->SetData<ComponentInspectorData>(inspectorData);
-
-
-
-
-        if (m_EditableLight) {
-            LightData currentLightData;
-            currentLightData.position = m_EditableLight->position;
-            currentLightData.color = m_EditableLight->color;
-            currentLightData.ambientStrength = m_EditableLight->ambientStrength;
-            currentLightData.diffuseStrength = m_EditableLight->diffuseStrength;
-            currentLightData.specularStrength = m_EditableLight->specularStrength;
-            currentLightData.shininess = m_EditableLight->shininess;
-            guiManager->SetData<LightData>(currentLightData);
-        }
-
-        guiManager->SetData<EngineStats>(*stats);
+        */
+ 
+        guiManager->UpdateControllersPush();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderCallback();
 
-        // Update all  systems
         m_Registry->Update(deltaTime);
 
-        // GUI Rendering
-        guiManager->BeginFrame();
-        guiManager->RenderPanels();
-        guiManager->EndFrame();
-
-        if (m_EditableLight) {
-            const LightData& modifiedLightData = guiManager->GetData<LightData>();
-            m_EditableLight->position = modifiedLightData.position;
-            m_EditableLight->color = modifiedLightData.color;
-            m_EditableLight->ambientStrength = modifiedLightData.ambientStrength;
-            m_EditableLight->diffuseStrength = modifiedLightData.diffuseStrength;
-            m_EditableLight->specularStrength = modifiedLightData.specularStrength;
-            m_EditableLight->shininess = modifiedLightData.shininess;
-        }
+        guiManager->RenderViews();
+        guiManager->UpdateControllersPull();
 
         glfwMakeContextCurrent(window);
         glfwSwapBuffers(window);

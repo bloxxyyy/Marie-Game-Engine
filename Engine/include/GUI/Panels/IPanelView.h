@@ -1,8 +1,8 @@
 #pragma once
 
-class IPanel {
+class IPanelView {
 public:
-    virtual ~IPanel() = default;
+    virtual ~IPanelView() = default;
     virtual void OnImGuiRender() = 0;
     bool IsOpen = true;
 };

@@ -2,12 +2,13 @@
 
 #include <vector>
 #include <memory>
-#include "GUI/Panels/IPanel.h"
+#include "GUI/Panels/IPanelView.h"
 #include <GLFW/glfw3.h>
 
 #include <map>
 #include <typeindex>
 #include <any>
+#include "Panels/IPanelController.h"
 
 class GuiManager
 {
@@ -15,52 +16,22 @@ public:
     GuiManager(GLFWwindow* window);
     ~GuiManager();
 
-    void BeginFrame();
-    void RenderPanels();
-    void EndFrame();
+    void UpdateControllersPush();
+    void UpdateControllersPull();
+    void RenderViews();
 
-    template<typename TPanel>
-    TPanel* AddPanel()
+    template<typename TController, typename... TArgs>
+    TController* AddController(TArgs&&... args)
     {
-        using TData = typename TPanel::DataType;
-
-        auto it = m_DataHub.find(std::type_index(typeid(TData)));
-        if (it == m_DataHub.end())
-        {
-            m_DataHub[std::type_index(typeid(TData))] = TData{};
-        }
-
-        TData& dataCache = std::any_cast<TData&>(m_DataHub.at(std::type_index(typeid(TData))));
-
-        auto panel = std::make_unique<TPanel>(dataCache);
-        TPanel* ptr = panel.get();
-        m_Panels.emplace_back(std::move(panel));
+        auto controller = std::make_unique<TController>(std::forward<TArgs>(args)...);
+        TController* ptr = controller.get();
+        m_Controllers.emplace_back(std::move(controller));
         return ptr;
     }
 
-    template<typename TData>
-    void SetData(const TData& data) {
-        // First, make sure an entry for this data type exists.
-        auto it = m_DataHub.find(std::type_index(typeid(TData)));
-        if (it == m_DataHub.end()) {
-            // If not, create it.
-            m_DataHub[std::type_index(typeid(TData))] = data;
-        }
-        else {
-            // If it exists, get a reference to the object INSIDE the std::any...
-            auto& dataCache = std::any_cast<TData&>(it->second);
-            // ...and UPDATE it, instead of replacing the std::any itself.
-            dataCache = data;
-        }
-    }
-
-    template<typename TData>
-    const TData& GetData() const {
-        return std::any_cast<const TData&>(m_DataHub.at(std::type_index(typeid(TData))));
-    }
-
 private:
+    void BeginFrame();
+    void EndFrame();
     GLFWwindow* m_Window;
-    std::vector<std::unique_ptr<IPanel>> m_Panels;
-    std::map<std::type_index, std::any> m_DataHub;
+    std::vector<std::unique_ptr<IPanelController>> m_Controllers;
 };

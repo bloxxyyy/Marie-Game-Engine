@@ -1,8 +1,8 @@
 #pragma once
-#include "GUI/Panels/IPanel.h"
+#include "GUI/Panels/IPanelView.h"
 #include "GUI/Data/LightData.h"
 
-class LightEditorPanel : public IPanel {
+class LightEditorPanel : public IPanelView {
 public:
     using DataType = LightData;
     LightEditorPanel(LightData& data);

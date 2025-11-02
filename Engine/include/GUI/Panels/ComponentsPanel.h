@@ -1,8 +1,8 @@
 #pragma once
-#include "GUI/Panels/IPanel.h"
+#include "GUI/Panels/IPanelView.h"
 #include "GUI/Data/ComponentInspectorData.h"
 
-class ComponentsPanel : public IPanel {
+class ComponentsPanel : public IPanelView {
 public:
     using DataType = ComponentInspectorData;
 

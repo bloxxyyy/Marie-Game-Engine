@@ -1,8 +1,8 @@
 #pragma once
-#include "GUI/Panels/IPanel.h"
+#include "GUI/Panels/IPanelView.h"
 #include "GUI/Data/EntityListData.h"
 
-class EntitiesPanel : public IPanel {
+class EntitiesPanel : public IPanelView {
 public:
 
     // This panel declares its dependency on EntityListData.

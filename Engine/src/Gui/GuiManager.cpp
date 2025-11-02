@@ -38,17 +38,33 @@ GuiManager::~GuiManager()
     ImGui::DestroyContext();
 }
 
+void GuiManager::UpdateControllersPush() {
+    for (auto& controller : m_Controllers) {
+        controller->UpdatePush();
+    }
+}
+
+void GuiManager::UpdateControllersPull() {
+    for (auto& controller : m_Controllers) {
+        controller->UpdatePull();
+    }
+}
+
+void GuiManager::RenderViews() {
+    BeginFrame();
+
+    for (auto& controller : m_Controllers) {
+        controller->GetView().OnImGuiRender();
+    }
+
+    EndFrame();
+}
+
 void GuiManager::BeginFrame()
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-}
-
-void GuiManager::RenderPanels()
-{
-    for (auto& panel : m_Panels)
-        panel->OnImGuiRender();
 }
 
 void GuiManager::EndFrame()
