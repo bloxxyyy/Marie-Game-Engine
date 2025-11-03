@@ -3,7 +3,6 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Material.h"
-#include "Light.h"
 #include "Primitives.h"
 
 #include <vector>
@@ -26,6 +25,14 @@ int main() {
         auto texture = std::make_shared<Texture>("C:\\MarieEngine\\Engine\\Textures\\example.png");
         auto sharedMaterial = std::make_shared<Material>(texture);
 
+        Entity lightEntity = registry.CreateEntity();
+        registry.AddComponent(lightEntity, TagComponent{ "Point Light" });
+        registry.AddComponent(lightEntity, TransformComponent{ {0.0f, 0.0f, 0.0f} });
+        registry.AddComponent(lightEntity, LightComponent{
+            {1.0f, 1.0f, 1.0f}, // Color
+            0.2f, 1.0f, 1.0f, 32.0f // ambient, diffuse, specular, shininess
+            });
+
         Entity cube1 = registry.CreateEntity();
         registry.AddComponent(cube1, TagComponent{ "Cube A" });
         registry.AddComponent(cube1, RenderComponent{ cubeMesh, sharedMaterial });
@@ -40,16 +47,12 @@ int main() {
         //registry.AddComponent(cube3, TagComponent{ "Hidden Cube" });
         //registry.AddComponent(cube3, TransformComponent{ {1.0f, 0.0f, 0.0f}, {}, {0.7f, 0.7f, 0.7f} });
 
-        Light light({ 0,0,1 }, { 1,1,1 }, 0.1f, 1.0f, 1.0f);
-        engine.RegisterEditableLight(&light);
-
         Shader shader(
             "C:\\MarieEngine\\Engine\\Shaders\\triangle.vert",
             "C:\\MarieEngine\\Engine\\Shaders\\triangle.frag"
         );
 
         registry.RegisterSystem<RenderSystem>(shader);
-
 
         //shader.Use();
         //light.ApplyToShader(shader);
@@ -72,7 +75,6 @@ int main() {
         engine.Run([&]() {
             //texture.Bind(GL_TEXTURE0);
             shader.Use();
-            light.ApplyToShader(shader);
 
             // Get view and projection from engine's camera
             glm::mat4 view = engine.GetCameraViewMatrix();

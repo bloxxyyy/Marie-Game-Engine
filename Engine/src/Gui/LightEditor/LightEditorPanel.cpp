@@ -1,7 +1,8 @@
 #include "GUI/LightEditor/LightEditorPanel.h"
 #include "imgui.h"
+#include <functional>
 
-LightEditorPanel::LightEditorPanel(LightData& data) : m_Data(data) {}
+LightEditorPanel::LightEditorPanel(LightData& data, std::function<void()> onDirty) : m_Data(data), m_OnDirty(onDirty) {}
 
 void LightEditorPanel::OnImGuiRender()
 {
@@ -12,13 +13,16 @@ void LightEditorPanel::OnImGuiRender()
 
     // --- Position ---
     ImGui::Text("Position");
-    ImGui::DragFloat3("##Position", &m_Data.position[0], 0.1f);
+    if (ImGui::DragFloat3("##Position", &m_Data.position[0], 0.1f)) {
+        if (m_OnDirty) m_OnDirty();
+    }
     ImGui::Spacing();
 
     // --- Color ---
     ImGui::Text("Color");
-    ImGui::ColorEdit3("##Color", &m_Data.color[0]);
-
+    if (ImGui::ColorEdit3("##Color", &m_Data.color[0])) {
+        if (m_OnDirty) m_OnDirty();
+    }
     ImGui::Spacing();
 
     ImGui::Separator();
@@ -26,19 +30,27 @@ void LightEditorPanel::OnImGuiRender()
 
     // --- Lighting Properties ---
     ImGui::Text("Ambient Strength");
-    ImGui::SliderFloat("##Ambient", &m_Data.ambientStrength, 0.0f, 1.0f);
+    if (ImGui::SliderFloat("##Ambient", &m_Data.ambientStrength, 0.0f, 1.0f)) {
+        if (m_OnDirty) m_OnDirty();
+    }
     ImGui::Spacing();
 
     ImGui::Text("Diffuse Strength");
-    ImGui::SliderFloat("##Diffuse", &m_Data.diffuseStrength, 0.0f, 5.0f);
+    if (ImGui::SliderFloat("##Diffuse", &m_Data.diffuseStrength, 0.0f, 5.0f)) {
+        if (m_OnDirty) m_OnDirty();
+    }
     ImGui::Spacing();
 
     ImGui::Text("Specular Strength");
-    ImGui::SliderFloat("##Specular", &m_Data.specularStrength, 0.0f, 5.0f);
+    if (ImGui::SliderFloat("##Specular", &m_Data.specularStrength, 0.0f, 5.0f)) {
+        if (m_OnDirty) m_OnDirty();
+    }
     ImGui::Spacing();
 
     ImGui::Text("Shininess");
-    ImGui::SliderFloat("##Shininess", &m_Data.shininess, 2.0f, 256.0f);
+    if (ImGui::SliderFloat("##Shininess", &m_Data.shininess, 2.0f, 256.0f)) {
+        if (m_OnDirty) m_OnDirty();
+    }
 
     ImGui::PopItemWidth();
     ImGui::End();

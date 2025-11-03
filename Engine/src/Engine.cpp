@@ -46,6 +46,8 @@ Engine::Engine(int width, int height, const std::string& title) {
     guiManager->AddController<MonitoringController>(*stats);
     auto* entitiesController = guiManager->AddController<EntitiesPanelController>(*m_Registry);
     guiManager->AddController<ComponentsPanelController>(*m_Registry, entitiesController->GetViewData());
+
+    guiManager->AddController<LightEditorController>(*m_Registry, entitiesController->GetViewData());
 }
 
 Engine::~Engine() {
@@ -54,11 +56,6 @@ Engine::~Engine() {
 
     glfwDestroyWindow(window);
     glfwTerminate();
-}
-
-void Engine::RegisterEditableLight(Light* light) {
-    m_EditableLight = light;
-    guiManager->AddController<LightEditorController>(*m_EditableLight);
 }
 
 void Engine::InitGL() {

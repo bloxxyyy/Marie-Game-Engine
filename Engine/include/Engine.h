@@ -19,7 +19,6 @@
 #include "GUI/Data/EngineStats.h"
 #include "GUI/GuiManager.h"
 #include "Monitoring/Win_Monitoring.h"
-#include <Light.h>
 #include <ECS/ECSRegistry.h>
 
 class Engine {
@@ -28,7 +27,6 @@ public:
     ~Engine();
 
     void Run(const std::function<void()>& renderCallback);
-    void RegisterEditableLight(Light* light);
 
     Input* GetInput() { return input.get(); }
     Camera* GetCamera() { return camera.get(); }
@@ -49,8 +47,6 @@ private:
     std::unique_ptr<Camera> camera;
 
     std::unique_ptr<ECSRegistry> m_Registry;
-
-    Light* m_EditableLight = nullptr;
 
     std::unique_ptr<EngineStats> stats;
     std::unique_ptr<GuiManager> guiManager;
