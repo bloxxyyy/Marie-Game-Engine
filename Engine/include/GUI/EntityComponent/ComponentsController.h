@@ -17,7 +17,8 @@ public:
 
 private:
     ECSRegistry& m_Registry;
-    EntityListData& m_EntityListData; // Dependency on another controller's data
+    EntityListData& m_EntityListData;
     ComponentInspectorData m_ViewData;
     std::unique_ptr<ComponentsPanel> m_View;
+    bool m_IsDirty = false;
 };

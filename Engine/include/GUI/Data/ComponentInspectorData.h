@@ -10,5 +10,5 @@ struct ComponentInspectorData {
     std::optional<TagComponent> tag;
     std::optional<TransformComponent> transform;
     std::optional<RenderComponent> render;
-
+    std::optional<LightComponent> light;
 };

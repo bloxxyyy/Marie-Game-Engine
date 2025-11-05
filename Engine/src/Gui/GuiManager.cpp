@@ -2,8 +2,6 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <GUI/Theme/DefaultTheme.h>
-
-#include "GUI/LightEditor/LightEditorPanel.h"
 #include "GUI/Monitoring/MonitoringPanel.h"
 
 GuiManager::GuiManager(GLFWwindow* window) : m_Window(window)

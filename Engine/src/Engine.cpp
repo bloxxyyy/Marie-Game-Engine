@@ -6,12 +6,10 @@
 
 #include <GUI/GuiManager.h>
 #include <GUI/Data/LightData.h>
-#include <GUI/LightEditor/LightEditorPanel.h>
 #include <GUI/Monitoring/MonitoringPanel.h>
 #include <GUI/EntityComponent/EntitiesPanel.h>
 #include <ECS/Components.h>
 #include <GUI/EntityComponent/ComponentsPanel.h>
-#include <GUI/LightEditor/LightEditorController.h>
 #include <GUI/Monitoring/MonitoringController.h>
 #include <GUI/EntityComponent/EntitiesController.h>
 #include <GUI/EntityComponent/ComponentsController.h>
@@ -46,8 +44,6 @@ Engine::Engine(int width, int height, const std::string& title) {
     guiManager->AddController<MonitoringController>(*stats);
     auto* entitiesController = guiManager->AddController<EntitiesPanelController>(*m_Registry);
     guiManager->AddController<ComponentsPanelController>(*m_Registry, entitiesController->GetViewData());
-
-    guiManager->AddController<LightEditorController>(*m_Registry, entitiesController->GetViewData());
 }
 
 Engine::~Engine() {
