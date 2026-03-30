@@ -15,9 +15,9 @@ GuiManager::GuiManager(GLFWwindow* window) : m_Window(window)
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     io.Fonts->AddFontDefault();
-    DefaultTheme::RegularFont = io.Fonts->AddFontFromFileTTF("C:\\MarieEngine\\Engine\\Fonts\\Roboto-Regular.ttf", 20.0f);
-    DefaultTheme::TopBarFont = io.Fonts->AddFontFromFileTTF("C:\\MarieEngine\\Engine\\Fonts\\Roboto-Bold.ttf", 26.0f);
-    DefaultTheme::HeaderFont = io.Fonts->AddFontFromFileTTF("C:\\MarieEngine\\Engine\\Fonts\\Roboto-Bold.ttf", 22.0f);
+    DefaultTheme::RegularFont = io.Fonts->AddFontFromFileTTF("C:\\DevProjects\\Marie-Game-Engine\\Engine\\Fonts\\Roboto-Regular.ttf", 20.0f);
+    DefaultTheme::TopBarFont = io.Fonts->AddFontFromFileTTF("C:\\DevProjects\\Marie-Game-Engine\\Engine\\Fonts\\Roboto-Bold.ttf", 26.0f);
+    DefaultTheme::HeaderFont = io.Fonts->AddFontFromFileTTF("C:\\DevProjects\\Marie-Game-Engine\\Engine\\Fonts\\Roboto-Bold.ttf", 22.0f);
     
     if (DefaultTheme::RegularFont)
         io.FontDefault = DefaultTheme::RegularFont;

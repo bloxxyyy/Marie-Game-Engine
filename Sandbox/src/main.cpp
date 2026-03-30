@@ -20,11 +20,27 @@ int main() {
         Engine engine(800, 600, "MarieEngine");
 
         ECSRegistry& registry = engine.GetRegistry();
-
+        
         auto cubeMesh = std::make_shared<Mesh>(CreateCube());
-        auto texture = std::make_shared<Texture>("C:\\MarieEngine\\Engine\\Textures\\example.png");
-        auto sharedMaterial = std::make_shared<Material>(texture);
+        auto gizmoMesh = std::make_shared<Mesh>(CreateGizmoAxes(2.0f));
+        
+        auto texture = std::make_shared<Texture>(R"(C:\DevProjects\Marie-Game-Engine\Engine\Textures\example.png)");
+        
+        auto litShader = std::make_shared<Shader>(
+            R"(C:\DevProjects\Marie-Game-Engine\Engine\Shaders\triangle.vert)",
+            R"(C:\DevProjects\Marie-Game-Engine\Engine\Shaders\triangle.frag)"
+        );
+        
+        auto gizmoShader = std::make_shared<Shader>(
+            R"(C:\DevProjects\Marie-Game-Engine\Engine\Shaders\gizmo.vert)",
+            R"(C:\DevProjects\Marie-Game-Engine\Engine\Shaders\gizmo.frag)"
+        );
+        
+        auto litMaterial = std::make_shared<Material>(litShader);
+        litMaterial->Set("texture1", texture);
 
+        auto gizmoMaterial = std::make_shared<Material>(gizmoShader);
+        
         Entity lightEntity = registry.CreateEntity();
         registry.AddComponent(lightEntity, TagComponent{ "Point Light" });
         registry.AddComponent(lightEntity, TransformComponent{ {0.0f, 0.0f, 0.0f} });
@@ -35,61 +51,35 @@ int main() {
 
         Entity cube1 = registry.CreateEntity();
         registry.AddComponent(cube1, TagComponent{ "Cube A" });
-        registry.AddComponent(cube1, RenderComponent{ cubeMesh, sharedMaterial });
+        registry.AddComponent(cube1, RenderComponent{ cubeMesh, litMaterial });
         registry.AddComponent(cube1, TransformComponent{ {-1.0f, 0.0f, 0.0f} });
 
         Entity cube2 = registry.CreateEntity();
         registry.AddComponent(cube2, TagComponent{ "Cube B" });
-        registry.AddComponent(cube2, RenderComponent{ cubeMesh, sharedMaterial });
+        registry.AddComponent(cube2, RenderComponent{ cubeMesh, litMaterial });
         registry.AddComponent(cube2, TransformComponent{ {1.0f, 0.0f, 0.0f}, {}, {0.7f, 0.7f, 0.7f} });
 
-        //Entity cube3 = registry.CreateEntity();
-        //registry.AddComponent(cube3, TagComponent{ "Hidden Cube" });
-        //registry.AddComponent(cube3, TransformComponent{ {1.0f, 0.0f, 0.0f}, {}, {0.7f, 0.7f, 0.7f} });
-
-        Shader shader(
-            "C:\\MarieEngine\\Engine\\Shaders\\triangle.vert",
-            "C:\\MarieEngine\\Engine\\Shaders\\triangle.frag"
-        );
-
-        registry.RegisterSystem<RenderSystem>(shader);
-
-        //shader.Use();
-        //light.ApplyToShader(shader);
-        //material.ApplyToShader(shader);
-
-
-        //glUniform1i(glGetUniformLocation(shader.ID, "texture1"), 0);
-
-        /*
-        Mesh transformGizmo = CreateGizmoAxes(1.0f);
-        Shader shader(
-            "C:\\MarieEngine\\Engine\\Shaders\\gizmo.vert",
-            "C:\\MarieEngine\\Engine\\Shaders\\gizmo.frag"
-        );
-        shader.Use();
-        */
-
-
+        Entity gizmo = registry.CreateEntity();
+        registry.AddComponent(gizmo, TagComponent{ "World Gizmo" });
+        registry.AddComponent(gizmo, RenderComponent{ gizmoMesh, gizmoMaterial });
+        registry.AddComponent(gizmo, TransformComponent{ {0.0f, 0.0f, 0.0f} });
+ 
+        std::shared_ptr<RenderSystem> renderSystem = registry.RegisterSystem<RenderSystem>();
+        
         // Run the engine loop, pass a lambda to render each frame
         engine.Run([&]() {
-            //texture.Bind(GL_TEXTURE0);
-            shader.Use();
 
-            // Get view and projection from engine's camera
-            glm::mat4 view = engine.GetCameraViewMatrix();
-            glm::mat4 projection = engine.GetCameraProjectionMatrix();
-            shader.SetMat4("view", view);
-            shader.SetMat4("projection", projection);
-            shader.SetVec3("viewPos", engine.GetCamera()->Position);
+            renderSystem->SetCameraData(
+                engine.GetCameraViewMatrix(), 
+                engine.GetCameraProjectionMatrix(), 
+                engine.GetCamera()->Position
+            );
             
             auto& cube1Transform = registry.GetComponent<TransformComponent>(cube1);
             cube1Transform.rotation.y += 0.5f;
 
             auto& cube2Transform = registry.GetComponent<TransformComponent>(cube2);
             cube2Transform.rotation.x += 0.5f;
-               
-            //transformGizmo.Draw();
         });
     }
     catch (const std::exception& e) {

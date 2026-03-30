@@ -1,15 +1,24 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <memory>
+#include <map>
+#include <string>
+#include <variant>
+
 #include "Shader.h"
 #include "Texture.h"
-#include <memory>
+
+// This variant can hold any standard shader uniform type
+using MaterialParam = std::variant<float, int, glm::vec3, glm::mat4, std::shared_ptr<Texture>>;
 
 class Material {
 public:
-    glm::vec3 baseColor{ 1.0f, 1.0f, 1.0f };
-    std::shared_ptr<const Texture> texture = nullptr;
+    Material(std::shared_ptr<Shader> shader);
+    void Set(const std::string& name, MaterialParam value);
+    void Apply() const;
+    std::shared_ptr<Shader> GetShader() const { return m_Shader; }
 
-    Material(std::shared_ptr<const Texture> tex) : texture(tex) {}
-
-    void ApplyToShader(const Shader& shader) const;
+private:
+    std::shared_ptr<Shader> m_Shader;
+    std::map<std::string, MaterialParam> m_Parameters;
 };
