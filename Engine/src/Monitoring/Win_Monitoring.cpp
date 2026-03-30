@@ -1,11 +1,12 @@
 #include "Monitoring/Win_Monitoring.h"
 #include <GLFW/glfw3.h>
 
+#include <algorithm>
+
 Win_Monitoring::Win_Monitoring() {
     glGenQueries(1, &gpuQuery);
     lastFrameTime = static_cast<float>(glfwGetTime());
-
-    // Initialize CPU previous times
+    
     FILETIME idleTime, kernelTime, userTime;
     GetSystemTimes(&idleTime, &kernelTime, &userTime);
     prevIdleTime = idleTime;
@@ -40,9 +41,11 @@ double Win_Monitoring::GetCPUUsage(float deltaTime) {
     prevKernelTime = kernelTime;
     prevUserTime = userTime;
 
-    ULONGLONG total = kernel + user;
-    if (total <= 0) return smoothCPU;  // safeguard
-    double cpu = 100.0 * (1.0 - static_cast<double>(idle) / total);
+    const ULONGLONG total = kernel + user;
+    if (total <= 0) return smoothCPU;
+    const ULONGLONG active = total - idle;
+    const ULONGLONG cpuPercentTimes100 = (active * 10000) / total;
+    const double cpu = static_cast<double>(cpuPercentTimes100) / 100.0;
 
     if (smoothCPU == 0.0)
         smoothCPU = cpu;
@@ -52,22 +55,35 @@ double Win_Monitoring::GetCPUUsage(float deltaTime) {
     return smoothCPU;
 }
 
-FrameStats Win_Monitoring::UpdateFrameTiming(float currentTime) {
+FrameStats Win_Monitoring::UpdateFrameTiming(const float currentTime) {
     FrameStats stats;
 
     float rawDelta = currentTime - lastFrameTime;
     lastFrameTime = currentTime;
-
+    
     if (rawDelta <= 0.0f || rawDelta > 0.5f)
         rawDelta = 0.016f;
-
+    
     smoothDelta = smoothDelta + deltaSmoothing * (rawDelta - smoothDelta);
-    stats.deltaTime = smoothDelta;
+    stats.delta = smoothDelta;
+    
+    stats.fps = 1.0f / stats.delta;
+    
+    if (rollingAvgFps == 0.0f) {
+        rollingAvgFps = stats.fps;
+    } else {
 
-    stats.fps = 1.0f / stats.deltaTime;
-    fpsAccumulator += stats.fps;
-    frameCount++;
-    stats.avgFPS = fpsAccumulator / frameCount;
+        // deltaTime / 300.0f means it takes roughly 300 seconds (5 minutes)
+        // for old data to completely fade out of the average.
+        float alpha = stats.delta / 300.0f;
+        
+        // Clamp alpha just in case deltaTime spikes massively
+        alpha = std::min(alpha, 1.0f);
+        
+        rollingAvgFps = rollingAvgFps + alpha * (stats.fps - rollingAvgFps);
+    }
+    
+    stats.avgFps = rollingAvgFps;
 
     return stats;
 }

@@ -64,16 +64,19 @@ glm::mat4 Engine::GetCameraProjectionMatrix() const {
     return glm::perspective(glm::radians(camera->Zoom), 800.0f / 600.0f, 0.1f, 100.0f);
 }
 
-void Engine::Run(const std::function<void()>& renderCallback) {
+void Engine::Run(const std::function<void()>& renderCallback)
+{
     while (!glfwWindowShouldClose(window)) {
 
-        float currentFrame = static_cast<float>(glfwGetTime());
-        FrameStats frameStats = monitorManager->UpdateFrameTiming(currentFrame);
-        deltaTime = frameStats.deltaTime;
-        stats->avgFPS = frameStats.avgFPS;
-        stats->fps = frameStats.fps;
-        stats->deltaTime = frameStats.deltaTime;
-        stats->cpuUsage = monitorManager->GetCPUUsage(deltaTime);
+        const float currentFrame = static_cast<float>(glfwGetTime());
+        const auto [delta, fps, avgFPS] = monitorManager->UpdateFrameTiming(currentFrame);
+        
+        deltaTime = delta;
+        
+        stats->avgFPS = avgFPS;
+        stats->fps = fps;
+        stats->deltaTime = delta;
+        stats->cpuUsage = monitorManager->GetCPUUsage(delta);
 
         Input::Get().Update();
         if (Input::Get().IsMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {

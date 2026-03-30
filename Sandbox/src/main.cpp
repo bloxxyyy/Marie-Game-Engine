@@ -5,11 +5,8 @@
 #include "Material.h"
 #include "Primitives.h"
 
-#include <vector>
 #include <iostream>
 #include <memory>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <ECS/ECSRegistry.h>
 #include <ECS/Components.h>
@@ -83,7 +80,7 @@ int main() {
         });
     }
     catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.what() << '\n';
         return -1;
     }
 
