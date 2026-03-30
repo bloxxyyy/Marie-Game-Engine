@@ -18,10 +18,6 @@ function Write-Section($title) { Write-Host "`n=== $title ===`n" -ForegroundColo
 # Project root
 $rootDir = Resolve-Path "$PSScriptRoot\.."
 
-# Detect solution
-$solution = Get-ChildItem -Path $rootDir -Filter *.sln | Select-Object -First 1
-if (-not $solution) { Write-ErrorMsg "No solution file found in $rootDir"; exit 1 }
-
 # MSBuild executable (assumes in PATH)
 $msbuild = "MSBuild.exe"
 
