@@ -8,7 +8,7 @@ public:
     
     void SetCameraData(const glm::mat4& view, const glm::mat4& projection, const glm::vec3& viewPos);
 
-    void Update(ECSRegistry& registry, float deltaTime) override;
+    void Update(ECSRegistry& registry, double deltaTime) override;
 
 private:
     glm::mat4 mViewMatrix;

@@ -11,7 +11,7 @@ void RenderSystem::SetCameraData(const glm::mat4& view, const glm::mat4& project
     mViewPos = viewPos;
 }
 
-void RenderSystem::Update(ECSRegistry& registry, float deltaTime) {
+void RenderSystem::Update(ECSRegistry& registry, double deltaTime) {
     const auto& transformMap = registry.GetComponentMap<TransformComponent>();
     auto& renderableMap = registry.GetComponentMap<RenderComponent>();
     auto& lightMap = registry.GetComponentMap<LightComponent>();

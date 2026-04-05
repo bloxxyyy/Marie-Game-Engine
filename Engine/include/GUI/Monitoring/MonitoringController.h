@@ -3,9 +3,7 @@
 #include "GUI/Data/EngineStats.h"
 #include <memory>
 
-class GuiManager;
 class MonitoringPanel;
-struct EngineStats;
 
 class MonitoringController : public IPanelController {
 public:
@@ -16,7 +14,7 @@ public:
     IPanelView& GetView() override;
 
 private:
-    EngineStats& m_TargetStats; // Reference to the Model
-    EngineStats m_ViewData;     // The ViewModel
+    EngineStats& m_TargetStats; // backend data
+    EngineStats m_ViewData;     // snapshot for view
     std::unique_ptr<MonitoringPanel> m_View;
 };

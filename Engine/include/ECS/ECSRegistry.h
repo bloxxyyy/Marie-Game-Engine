@@ -17,7 +17,7 @@ class ECSRegistry {
 public:
     ECSRegistry();
 
-    void Update(float deltaTime);
+    void Update(double deltaTime);
 
     // --- Entity Management ---
     Entity CreateEntity();

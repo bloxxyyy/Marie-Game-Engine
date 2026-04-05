@@ -3,17 +3,20 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <GUI/Theme/DefaultTheme.h>
 #include "GUI/Monitoring/MonitoringPanel.h"
+#include <implot.h>
 
 GuiManager::GuiManager(GLFWwindow* window) : m_Window(window)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
+
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
+    
     io.Fonts->AddFontDefault();
     DefaultTheme::RegularFont = io.Fonts->AddFontFromFileTTF("C:\\DevProjects\\Marie-Game-Engine\\Engine\\Fonts\\Roboto-Regular.ttf", 20.0f);
     DefaultTheme::TopBarFont = io.Fonts->AddFontFromFileTTF("C:\\DevProjects\\Marie-Game-Engine\\Engine\\Fonts\\Roboto-Bold.ttf", 26.0f);
@@ -31,6 +34,7 @@ GuiManager::GuiManager(GLFWwindow* window) : m_Window(window)
 
 GuiManager::~GuiManager()
 {
+    ImPlot::DestroyContext();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();

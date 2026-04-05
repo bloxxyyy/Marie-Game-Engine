@@ -18,8 +18,10 @@
 #include "Input.h"
 #include "GUI/Data/EngineStats.h"
 #include "GUI/GuiManager.h"
-#include "Monitoring/Win_Monitoring.h"
 #include <ECS/ECSRegistry.h>
+
+#include "Monitoring/CpuMonitor.h"
+#include "Monitoring/FrameTimer.h"
 
 class Engine {
 public:
@@ -50,7 +52,8 @@ private:
 
     std::unique_ptr<EngineStats> stats;
     std::unique_ptr<GuiManager> guiManager;
-    std::unique_ptr<Win_Monitoring> monitorManager;
+    std::unique_ptr<FrameTimer> frameTimer;
+    std::unique_ptr<CpuMonitor> cpuMonitor;
 
     float deltaTime = 0.0f;
 };

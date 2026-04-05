@@ -1,8 +1,12 @@
 #pragma once
+#include <vector>
 
 struct EngineStats {
-    float deltaTime = 0.0f;
-    float fps = 0.0f;
-    float avgFPS = 0.0f;
-    double cpuUsage = 0.0f;
+    double deltaTime = 0.0;
+    double fps = 0.0;
+    double avgFPS = 0.0;
+    double cpuUsage = 0.0;
+
+    std::vector<double> fpsHistory;
+    const size_t maxHistory = 1200;
 };

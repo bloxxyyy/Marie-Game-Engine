@@ -26,6 +26,10 @@ project "Engine"
         "vendor/src/GLAD/glad.c",
         "vendor/src/STB/stb_image.cpp",
 
+        -- imPlot
+        "vendor/implot/implot.cpp",
+        "vendor/implot/implot_items.cpp",
+
         -- ImGui core
         "vendor/imgui/*.cpp",
 
@@ -50,7 +54,8 @@ project "Engine"
         "vendor/include/GLM",
         "vendor/imgui",
         "vendor/imgui/backends",
-        "vendor/imgui/misc/cpp"
+        "vendor/imgui/misc/cpp",
+        "vendor/implot",
     }
 
     libdirs {
@@ -73,6 +78,10 @@ project "Engine"
             "vendor/imgui/*.h",
             "vendor/imgui/backends/*.h",
             "vendor/imgui/misc/cpp/*.h"
+        },
+        ["External/ImPlot"] = {
+            "vendor/implot/*.cpp",
+            "vendor/implot/*.h"
         }
     }
 

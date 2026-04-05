@@ -10,7 +10,7 @@ Entity ECSRegistry::CreateEntity() {
     return m_NextEntityID++;
 }
 
-void ECSRegistry::Update(float deltaTime) {
+void ECSRegistry::Update(double deltaTime) {
     for (auto& system : m_Systems) {
         system->Update(*this, deltaTime);
     }

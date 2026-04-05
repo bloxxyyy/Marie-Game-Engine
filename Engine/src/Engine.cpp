@@ -39,7 +39,8 @@ Engine::Engine(int width, int height, const std::string& title) {
 
     stats = std::make_unique<EngineStats>();
     guiManager = std::make_unique<GuiManager>(window);
-    monitorManager = std::make_unique<Win_Monitoring>();
+    frameTimer = std::make_unique<FrameTimer>();
+    cpuMonitor = std::make_unique<CpuMonitor>();
 
     guiManager->AddController<MonitoringController>(*stats);
     auto* entitiesController = guiManager->AddController<EntitiesPanelController>(*m_Registry);
@@ -68,15 +69,15 @@ void Engine::Run(const std::function<void()>& renderCallback)
 {
     while (!glfwWindowShouldClose(window)) {
 
-        const float currentFrame = static_cast<float>(glfwGetTime());
-        const auto [delta, fps, avgFPS] = monitorManager->UpdateFrameTiming(currentFrame);
+        const double currentFrame = glfwGetTime();
+        const auto [delta, fps, avgFPS] = frameTimer->Update(currentFrame);
         
-        deltaTime = delta;
+        deltaTime = static_cast<float>(delta);
         
         stats->avgFPS = avgFPS;
         stats->fps = fps;
         stats->deltaTime = delta;
-        stats->cpuUsage = monitorManager->GetCPUUsage(delta);
+        stats->cpuUsage = cpuMonitor->Update(delta);
 
         Input::Get().Update();
         if (Input::Get().IsMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
