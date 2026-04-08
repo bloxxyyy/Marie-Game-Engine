@@ -70,7 +70,7 @@ void Engine::Run(const std::function<void()>& renderCallback)
     while (!glfwWindowShouldClose(window)) {
 
         const double currentFrame = glfwGetTime();
-        const auto [delta, fps, avgFPS] = frameTimer->Update(currentFrame);
+        const auto [rawDelta, delta, fps, avgFPS] = frameTimer->Update(currentFrame);
         
         deltaTime = static_cast<float>(delta);
         
